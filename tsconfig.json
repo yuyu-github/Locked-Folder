@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "outDir": "./build",
+    "rootDir": "./src",
+    "removeComments": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "incremental": true,
+    "allowJs": true,
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "inlineSourceMap": true,
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
