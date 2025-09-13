@@ -8,9 +8,9 @@ export function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 700,
-    title: 'Locked Record',
+    title: "Locked Folder",
     webPreferences: {
-      preload: path.join(__dirname, 'preload/preload.cjs'),
+      preload: path.join(__dirname, "preload/preload.cjs"),
     },
   });
 

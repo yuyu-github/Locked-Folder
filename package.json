@@ -1,5 +1,5 @@
 {
-  "name": "locked-record",
+  "name": "locked-folder",
   "version": "1.0.0",
   "main": "build/main.cjs",
   "type": "module",
