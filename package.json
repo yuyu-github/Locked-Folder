@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "postbuild": "cpx \"src/renderer/**/*.{html,css}\" build/renderer",
+    "postbuild": "cpx \"src/**/*.{html,css,json}\" build/",
     "watch:ts": "tsc -w",
-    "watch:assets": "cpx \"src/renderer/**/*.{html,css}\" build/renderer --watch --verbose",
+    "watch:assets": "cpx \"src/**/*.{html,css,json}\" build/ --watch --verbose",
     "watch": "npm-run-all -p watch:*"
   },
   "dependencies": {

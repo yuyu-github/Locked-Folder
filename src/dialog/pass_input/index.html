@@ -1,0 +1,12 @@
+<body>
+  <input id="pass" type="password" />
+  <button id="ok">OK</button>
+  <script>
+    const { ipcRenderer } = require('electron');
+    document.getElementById('ok').addEventListener('click', () => {
+      const value = document.getElementById('pass').value;
+      if (value.trim() === '') return;
+      ipcRenderer.send('return', value);
+    });
+  </script>
+</body>
