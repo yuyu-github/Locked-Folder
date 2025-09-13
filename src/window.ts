@@ -38,7 +38,7 @@ export function createMainWindow() {
   if (process.platform == 'darwin') Menu.setApplicationMenu(menu);
   else mainWindow.setMenu(menu);
 
-  mainWindow.loadFile('renderer/index.html');
+  mainWindow.loadFile(path.join(__dirname, "renderer/index.html"));
 
   mainWindow.on('closed', () => {
     mainWindow = null;

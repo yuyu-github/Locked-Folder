@@ -2,6 +2,7 @@
   "name": "locked-record",
   "version": "1.0.0",
   "main": "build/main.cjs",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "postbuild": "cpx \"src/renderer/**/*.{html,css}\" build/renderer",

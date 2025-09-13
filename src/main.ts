@@ -1,9 +1,11 @@
 import { app } from 'electron';
 
-import './ipc';
-import { createMainWindow, mainWindow } from './window';
+import "./ipc.js";
+import { createMainWindow, mainWindow } from "./window.js";
 
-createMainWindow();
+app.on("ready", () => {
+  createMainWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
