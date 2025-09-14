@@ -93,6 +93,7 @@ export async function openLFFolder() {
     if (lfInfo.version !== 1) return;
 
     fileMap = JSON.parse(decrypt(key, fs.readFileSync(`${path}/map.lfi`)).toString());
+    console.log(fileMap);
 
     lfFolderPath = path;
     cryptoKey = key;
@@ -104,7 +105,7 @@ export async function openLFFolder() {
 
 export function getItem(path: string, name: string): FileData | null {
   let current = fileMap;
-  for (let i in path.replace(/^\/|\/$/g, '').split('/')) {
+  for (let i of path.replace(/^\/|\/$/g, '').split('/')) {
     current = current.find((f) => f.isDirectory && f.name === i)?.children || [];
   }
   return current.find((f) => f.name === name) ?? null;
@@ -112,14 +113,18 @@ export function getItem(path: string, name: string): FileData | null {
 
 export function getChildren(path: string, mkfolder = false): FileData[] {
   let current = fileMap;
-  for (let i in path.replace(/^\/|\/$/g, '').split('/')) {
+  for (let i of path.replace(/^\/|\/$/g, '').split('/')) {
     let child = current.find((f) => f.isDirectory && f.name === i);
-    if (!child) {
-      child = createFolderData(path, i);
-      current.push(child);
+    if (mkfolder) {
+      if (!child) {
+        child = createFolderData(path, i);
+        current.push(child);
+      }
+      if (!child.children) child.children = [];
+      current = child.children;
+    } else {
+      current = child?.children ?? [];
     }
-    if (!child.children) child.children = [];
-    current = child.children;
   }
   return current;
 }

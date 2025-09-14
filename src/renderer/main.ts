@@ -56,7 +56,7 @@ async function refresh() {
 
     if (file.isDirectory) {
       div.addEventListener('dblclick', () => {
-        currentPath += `/${file.name}`;
+        currentPath += `${file.name}/`;
         refresh();
       });
     }
