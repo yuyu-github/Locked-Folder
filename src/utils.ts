@@ -17,6 +17,7 @@ export function decrypt(key: Buffer, data: Buffer): Buffer {
   const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]);
 }
+
 export function nameResolve(parent: string, name: string) {
   const children = getChildren(parent);
   let i = 1;
@@ -25,6 +26,15 @@ export function nameResolve(parent: string, name: string) {
     name = `${parsed.name} (${i++})${parsed.ext}`;
   }
   return name;
+}
+
+export function nameResolveFS(fullpath: string) {
+  let i = 1;
+  while (fs.existsSync(fullpath)) {
+    const parsed = path.parse(fullpath);
+    fullpath = path.join(parsed.dir, `${parsed.name} (${i++})${parsed.ext}`);
+  }
+  return fullpath;
 }
 
 export async function showDialog<T>(

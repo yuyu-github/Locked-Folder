@@ -7,6 +7,8 @@ filelistDiv.addEventListener('contextmenu', (e) => {
   api.showContextMenu('background', [
     ['newFile', { label: 'ファイルを作成' }],
     ['newFolder', { label: 'フォルダを作成' }],
+    ['uploadFile', { label: 'ファイルをアップロード' }],
+    ['uploadFolder', { label: 'フォルダをアップロード' }],
     ['', { type: 'separator' }],
     ['paste', { label: '貼り付け' }],
   ]);
@@ -26,6 +28,8 @@ export async function update() {
       div.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
         api.showContextMenu(`folder-${file.name}`, [
+          ['download', { label: 'ダウンロード' }],
+          ['', { type: 'separator' }],
           ['cut', { label: '切り取り' }],
           ['copy', { label: 'コピー' }],
           ['', { type: 'separator' }],
@@ -42,6 +46,7 @@ export async function update() {
         e.stopPropagation();
         api.showContextMenu(`file-${file.name}`, [
           ['open', { label: '開く' }],
+          ['download', { label: 'ダウンロード' }],
           ['', { type: 'separator' }],
           ['cut', { label: '切り取り' }],
           ['copy', { label: 'コピー' }],

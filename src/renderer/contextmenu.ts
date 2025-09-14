@@ -10,18 +10,31 @@ api.onContextMenuClick((e, caller, id) => {
       api.newFolder(currentPath);
       break;
     }
+    case 'uploadFile': {
+      api.uploadFile(currentPath);
+      break;
+    }
+    case 'uploadFolder': {
+      api.uploadFolder(currentPath);
+      break;
+    }
+    case 'download': {
+      const name = caller.replace(/^(file|folder)-/, '');
+      api.download(currentPath, name);
+      break;
+    }
     case 'open': {
-      const name = caller.split('-')[1];
+      const name = caller.replace(/^(file|folder)-/, '');
       api.open(currentPath, name);
       break;
     }
     case 'cut': {
-      const name = caller.split('-')[1];
+      const name = caller.replace(/^(file|folder)-/, '');
       api.cut(currentPath, name);
       break;
     }
     case 'copy': {
-      const name = caller.split('-')[1];
+      const name = caller.replace(/^(file|folder)-/, '');
       api.copy(currentPath, name);
       break;
     }
@@ -30,12 +43,12 @@ api.onContextMenuClick((e, caller, id) => {
       break;
     }
     case 'rename': {
-      const name = caller.split('-')[1];
+      const name = caller.replace(/^(file|folder)-/, '');
       api.rename(currentPath, name);
       break;
     }
     case 'delete': {
-      const name = caller.split('-')[1];
+      const name = caller.replace(/^(file|folder)-/, '');
       api.delete(currentPath, name);
       break;
     }

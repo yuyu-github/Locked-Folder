@@ -1,4 +1,4 @@
-import { ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
+import { dialog, ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
 import fs from 'fs';
 import { dirname, join as joinPath } from 'path';
 import {
@@ -6,6 +6,7 @@ import {
   createFileData,
   createFolderData,
   cryptoKey,
+  downloadFiles,
   fileClipboard,
   getChildren,
   getItem,
@@ -14,6 +15,7 @@ import {
   openedFiles,
   saveFileMap,
   setFileClipboard,
+  uploadFiles
 } from './manager.js';
 import { decrypt, nameResolve, showDialog } from './utils.js';
 import { mainWindow } from './window.js';
@@ -63,6 +65,45 @@ ipcMain.handle('newFolder', async (e, path: string) => {
 
   saveFileMap();
   mainWindow!.webContents.send('update');
+});
+
+ipcMain.handle('uploadFile', async (e, path: string) => {
+  if (!lfFolderPath || !cryptoKey) return;
+
+  const result = await dialog.showOpenDialog(mainWindow!, {
+    properties: ['openFile', 'multiSelections'],
+    title: 'ファイルを選択',
+  });
+  if (result.canceled || result.filePaths.length === 0) return;
+
+  uploadFiles(result.filePaths, path)
+});
+
+ipcMain.handle('uploadFolder', async (e, path: string) => {
+  if (!lfFolderPath || !cryptoKey) return;
+
+  const result = await dialog.showOpenDialog(mainWindow!, {
+    properties: ['openDirectory', 'multiSelections'],
+    title: 'フォルダを選択',
+  });
+  if (result.canceled || result.filePaths.length === 0) return;
+
+  uploadFiles(result.filePaths, path)
+});
+
+ipcMain.handle('download', async (e, path: string, name: string) => {
+  if (!lfFolderPath || !cryptoKey) return;
+
+  const result = await dialog.showOpenDialog(mainWindow!, {
+    properties: ['openDirectory', 'createDirectory'],
+    title: '保存先を選択',
+  });
+  if (result.canceled || result.filePaths.length === 0) return;
+  const target = result.filePaths[0];
+
+  const file = getItem(path, name);
+  if (!file) return;
+  downloadFiles([file], target);
 });
 
 ipcMain.handle('open', async (e, path: string, name: string) => {

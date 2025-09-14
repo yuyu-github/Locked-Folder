@@ -4,10 +4,11 @@ import { dialog } from 'electron';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { decrypt, encrypt, showDialog } from './utils.js';
+import { decrypt, encrypt, nameResolve, nameResolveFS, showDialog } from './utils.js';
+import { LATEST_VERSION, versionUp } from './version.js';
 import { mainWindow } from './window.js';
 
-interface FileData {
+export interface FileData {
   name: string;
   isDirectory: boolean;
   lastModified: number;
@@ -67,9 +68,7 @@ export async function createNewLFFolder() {
 
   fs.writeFileSync(
     `${lfFolderPath}/lfinfo.json`,
-    JSON.stringify({
-      version: 1,
-    })
+    JSON.stringify({version: LATEST_VERSION})
   );
 
   fileMap = [];
@@ -93,7 +92,7 @@ export async function openLFFolder() {
     const key = crypto.scryptSync(pass, 'salt', 32);
 
     const lfInfo = JSON.parse(fs.readFileSync(`${path}/lfinfo.json`, 'utf-8'));
-    if (lfInfo.version !== 1) return;
+    if (lfInfo.version !== LATEST_VERSION) versionUp(lfInfo.version, path, key);
 
     fileMap = JSON.parse(decrypt(key, fs.readFileSync(`${path}/map.lfi`)).toString());
 
@@ -202,6 +201,46 @@ chokidar.watch(path.join(os.tmpdir(), 'LockedFolder')).on('change', (filepath) =
     }
   }
 });
+
+export function uploadFiles(filePaths: string[], target: string, nest = false) {
+  const children = getChildren(target, true);
+  for (let filePath of filePaths) {
+    if (!fs.existsSync(filePath)) continue;
+    if (fs.lstatSync(filePath).isDirectory()) {
+      const folder = createFolderData(nameResolve(target, path.basename(filePath)));
+      children.push(folder);
+
+      const subFiles = fs.readdirSync(filePath);
+      uploadFiles(subFiles.map(f => path.join(filePath, f)), path.posix.join(target, folder.name), true);
+    } else {
+      const file = createFileData(nameResolve(target, path.basename(filePath)))
+      children.push(file);
+      saveFile(file, fs.readFileSync(filePath))
+    }
+  }
+
+  if (!nest) {
+    saveFileMap();
+    mainWindow!.webContents.send('update');
+  }
+}
+
+export function downloadFiles(files: FileData[], target: string) {
+  if (!lfFolderPath || !cryptoKey) return;
+  for (let file of files) {
+    const targetPath = nameResolveFS(path.join(target, file.name));
+    if (file.isDirectory) {
+      fs.mkdirSync(targetPath);
+      if (file.children) downloadFiles(file.children, targetPath);
+    } else {
+      const dataPath = path.join(lfFolderPath!, 'data', file.dataName!);
+      let data;
+      if (fs.existsSync(dataPath)) data = decrypt(cryptoKey!, fs.readFileSync(dataPath));
+      else data = Buffer.from(''); 
+      fs.writeFileSync(targetPath, data);
+    }
+  }
+}
 
 export function copyFile(file: FileData) {
   const newFile: FileData = { ...file };
