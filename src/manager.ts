@@ -112,6 +112,38 @@ export function onChangeLFFolder() {
   mainWindow!.webContents.send('changeLFFolder');
 }
 
+export async function changePass() {
+  if (!lfFolderPath || !cryptoKey) return;
+
+  const pass = await showDialog<string>(mainWindow!, 'pass_input', 'パスワードを入力');
+  if (!pass) return;
+  if (!cryptoKey.equals(crypto.scryptSync(pass, 'salt', 32))) {
+    dialog.showErrorBox('エラー', 'パスワードが違います');
+    return;
+  }
+  const oldKey = cryptoKey;
+
+  const newPass = await showDialog<string>(mainWindow!, 'pass_input', '新しいパスワードを設定');
+  if (!newPass) return;
+  if (newPass != (await showDialog<string>(mainWindow!, 'pass_input', 'パスワードを確認'))) {
+    dialog.showErrorBox('エラー', 'パスワードが一致しません');
+    return;
+  }
+  const newKey = crypto.scryptSync(newPass, 'salt', 32);
+
+  function reEncrypt(path: string) {
+    const data = decrypt(oldKey!, fs.readFileSync(path));
+    fs.writeFileSync(path, encrypt(newKey, data));
+  }
+  
+  for (let f of fs.readdirSync(lfFolderPath!)) {
+    if (path.extname(f) === '.lfi') reEncrypt(path.join(lfFolderPath!, f));
+  }
+  for (let f of fs.readdirSync(path.join(lfFolderPath!, 'data'))) {
+    reEncrypt(path.join(lfFolderPath!, 'data', f));
+  }
+}
+
 export function getItem(path: string, name: string): FileData | null {
   const pathlist = path.split('/');
   if (!pathlist[0]) pathlist.shift();
