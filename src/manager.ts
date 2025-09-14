@@ -1,5 +1,5 @@
 import chokidar from 'chokidar';
-import crypto, { randomUUID } from 'crypto';
+import crypto from 'crypto';
 import { dialog } from 'electron';
 import fs from 'fs';
 import os from 'os';
@@ -8,7 +8,6 @@ import { decrypt, encrypt, showDialog } from './utils.js';
 import { mainWindow } from './window.js';
 
 interface FileData {
-  path: string;
   name: string;
   isDirectory: boolean;
   lastModified: number;
@@ -17,20 +16,18 @@ interface FileData {
   children?: FileData[];
 }
 
-export function createFileData(path: string, name: string): FileData {
+export function createFileData(name: string): FileData {
   return {
-    path,
     name,
     isDirectory: false,
     lastModified: Date.now(),
     created: Date.now(),
-    dataPath: randomUUID(),
+    dataPath: crypto.randomUUID(),
   };
 }
 
-export function createFolderData(path: string, name: string): FileData {
+export function createFolderData(name: string): FileData {
   return {
-    path,
     name,
     isDirectory: true,
     lastModified: Date.now(),
@@ -43,6 +40,7 @@ export let lfFolderPath: string | null = null;
 export let cryptoKey: Buffer | null = null;
 export let fileMap: FileData[] = [];
 export let openedFiles: Record<string, FileData> = {};
+export let fileClipboard: FileData[] = [];
 
 export async function createNewLFFolder() {
   //LFを作成する場所を選択させて、そのパスを取得
@@ -74,10 +72,10 @@ export async function createNewLFFolder() {
     })
   );
 
+  fileMap = [];
   fs.writeFileSync(`${lfFolderPath}/map.lfi`, encrypt(cryptoKey, Buffer.from('[]')));
 
-  deleteTmpFiles();
-  mainWindow!.webContents.send('changeLFFolder');
+  onChangeLFFolder();
 }
 
 export async function openLFFolder() {
@@ -99,15 +97,54 @@ export async function openLFFolder() {
 
     fileMap = JSON.parse(decrypt(key, fs.readFileSync(`${path}/map.lfi`)).toString());
 
-    deleteTmpFiles();
-
     lfFolderPath = path;
     cryptoKey = key;
-    mainWindow!.webContents.send('changeLFFolder');
+    onChangeLFFolder();
   } catch (e) {
     dialog.showErrorBox('エラー', '読み込みに失敗しました');
     console.error(e);
   }
+}
+
+export function onChangeLFFolder() {
+  deleteTmpFiles();
+  openedFiles = {};
+  fileClipboard = [];
+  mainWindow!.webContents.send('changeLFFolder');
+}
+
+export function getItem(path: string, name: string): FileData | null {
+  const pathlist = path.split('/');
+  if (!pathlist[0]) pathlist.shift();
+  if (!pathlist.at(-1)) pathlist.pop();
+
+  let current = fileMap;
+  for (let i of pathlist) {
+    current = current.find((f) => f.isDirectory && f.name === i)?.children || [];
+  }
+  return current.find((f) => f.name === name) ?? null;
+}
+
+export function getChildren(path: string, mkfolder = false): FileData[] {
+  const pathlist = path.split('/');
+  if (!pathlist[0]) pathlist.shift();
+  if (!pathlist.at(-1)) pathlist.pop();
+
+  let current = fileMap;
+  for (let i of pathlist) {
+    let child = current.find((f) => f.isDirectory && f.name === i);
+    if (mkfolder) {
+      if (!child) {
+        child = createFolderData(i);
+        current.push(child);
+      }
+      if (!child.children) child.children = [];
+      current = child.children;
+    } else {
+      current = child?.children ?? [];
+    }
+  }
+  return current;
 }
 
 export function deleteTmpFiles(all = false) {
@@ -123,32 +160,6 @@ export function deleteTmpFiles(all = false) {
       }
     }
   }
-}
-
-export function getItem(path: string, name: string): FileData | null {
-  let current = fileMap;
-  for (let i of path.replace(/^\/|\/$/g, '').split('/')) {
-    current = current.find((f) => f.isDirectory && f.name === i)?.children || [];
-  }
-  return current.find((f) => f.name === name) ?? null;
-}
-
-export function getChildren(path: string, mkfolder = false): FileData[] {
-  let current = fileMap;
-  for (let i of path.replace(/^\/|\/$/g, '').split('/')) {
-    let child = current.find((f) => f.isDirectory && f.name === i);
-    if (mkfolder) {
-      if (!child) {
-        child = createFolderData(path, i);
-        current.push(child);
-      }
-      if (!child.children) child.children = [];
-      current = child.children;
-    } else {
-      current = child?.children ?? [];
-    }
-  }
-  return current;
 }
 
 export function getTmpFilePath(file: FileData): string {
@@ -191,3 +202,23 @@ chokidar.watch(path.join(os.tmpdir(), 'LockedFolder')).on('change', (filepath) =
     }
   }
 });
+
+export function copyFile(file: FileData) {
+  const newFile: FileData = { ...file };
+  if (file.dataPath) {
+    newFile.dataPath = crypto.randomUUID();
+    const oldDataPath = path.join(lfFolderPath!, 'data', file.dataPath!);
+    const newDataPath = path.join(lfFolderPath!, 'data', newFile.dataPath!);
+    if (fs.existsSync(oldDataPath)) {
+      fs.copyFileSync(oldDataPath, newDataPath);
+    }
+  }
+  if (file.children) {
+    newFile.children = file.children.map((child) => copyFile(child));
+  }
+  return newFile;
+}
+
+export function setFileClipboard(files: FileData[]) {
+  fileClipboard = files;
+}

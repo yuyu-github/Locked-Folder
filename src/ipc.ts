@@ -2,15 +2,18 @@ import { ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
 import fs from 'fs';
 import { dirname, join as joinPath } from 'path';
 import {
+  copyFile,
   createFileData,
   createFolderData,
   cryptoKey,
+  fileClipboard,
   getChildren,
   getItem,
   getTmpFilePath,
   lfFolderPath,
   openedFiles,
   saveFileMap,
+  setFileClipboard,
 } from './manager.js';
 import { decrypt, nameResolve, showDialog } from './utils.js';
 import { mainWindow } from './window.js';
@@ -46,7 +49,7 @@ ipcMain.handle('newFile', async (e, path: string) => {
   const name = await showDialog<string>(mainWindow!, 'input', 'ファイル名を入力');
   if (!name) return;
 
-  getChildren(path, true).push(createFileData(path, nameResolve(path, name)));
+  getChildren(path, true).push(createFileData(nameResolve(path, name)));
 
   saveFileMap();
   mainWindow!.webContents.send('refresh');
@@ -56,7 +59,7 @@ ipcMain.handle('newFolder', async (e, path: string) => {
   const name = await showDialog<string>(mainWindow!, 'input', 'フォルダ名を入力');
   if (!name) return;
 
-  getChildren(path, true).push(createFolderData(path, nameResolve(path, name)));
+  getChildren(path, true).push(createFolderData(nameResolve(path, name)));
 
   saveFileMap();
   mainWindow!.webContents.send('refresh');
@@ -83,6 +86,37 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
   fs.writeFileSync(tmpFilePath, data);
   shell.openPath(tmpFilePath);
   openedFiles[tmpFilePath] = file;
+});
+
+ipcMain.handle('cut', (e, path: string, name: string) => {
+  const file = getItem(path, name);
+  if (!file) return;
+  setFileClipboard([file]);
+
+  const children = getChildren(path);
+  for (let i = children.length - 1; i >= 0; i--) {
+    if (children[i].name === name) children.splice(i, 1);
+  }
+
+  saveFileMap();
+  mainWindow!.webContents.send('refresh');
+});
+
+ipcMain.handle('copy', (e, path: string, name: string) => {
+  const file = getItem(path, name);
+  if (!file) return;
+  setFileClipboard([copyFile(file)]);
+});
+
+ipcMain.handle('paste', (e, path: string) => {
+  const children = getChildren(path, true);
+  for (let file of fileClipboard) {
+    file.name = nameResolve(path, file.name);
+    children.push(file);
+  }
+
+  saveFileMap();
+  mainWindow!.webContents.send('refresh');
 });
 
 ipcMain.handle('rename', async (e, path: string, name: string) => {

@@ -7,9 +7,10 @@ listDiv.addEventListener('contextmenu', (e) => {
   api.showContextMenu('background', [
     ['newFile', { label: 'ファイルを作成' }],
     ['newFolder', { label: 'フォルダを作成' }],
+    ['', { type: 'separator' }],
+    ['paste', { label: '貼り付け' }],
   ]);
 });
-
 
 async function refresh() {
   if (!api.isOpen()) {
@@ -28,6 +29,9 @@ async function refresh() {
       div.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
         api.showContextMenu(`folder-${file.name}`, [
+          ['cut', { label: '切り取り' }],
+          ['copy', { label: 'コピー' }],
+          ['', { type: 'separator' }],
           ['rename', { label: '名前を変更' }],
           ['delete', { label: '削除' }],
         ]);
@@ -42,6 +46,9 @@ async function refresh() {
         e.stopPropagation();
         api.showContextMenu(`file-${file.name}`, [
           ['open', { label: '開く' }],
+          ['', { type: 'separator' }],
+          ['cut', { label: '切り取り' }],
+          ['copy', { label: 'コピー' }],
           ['', { type: 'separator' }],
           ['rename', { label: '名前を変更' }],
           ['delete', { label: '削除' }],
@@ -74,6 +81,20 @@ api.onContextMenuClick((e, caller, id) => {
     case 'open': {
       const name = caller.split('-')[1];
       api.open(currentPath, name);
+      break;
+    }
+    case 'cut': {
+      const name = caller.split('-')[1];
+      api.cut(currentPath, name);
+      break;
+    }
+    case 'copy': {
+      const name = caller.split('-')[1];
+      api.copy(currentPath, name);
+      break;
+    }
+    case 'paste': {
+      api.paste(currentPath);
       break;
     }
     case 'rename': {

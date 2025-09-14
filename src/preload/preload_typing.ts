@@ -11,6 +11,9 @@ interface IApi {
   newFile: (path: string) => Promise<void>;
   newFolder: (path: string) => Promise<void>;
   open: (path: string, name: string) => Promise<void>;
+  cut: (path: string, name: string) => Promise<void>;
+  copy: (path: string, name: string) => Promise<void>;
+  paste: (path: string) => Promise<void>;
   rename: (path: string, name: string) => Promise<void>;
   delete: (path: string, name: string) => Promise<void>;
 
