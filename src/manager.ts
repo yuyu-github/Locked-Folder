@@ -93,12 +93,12 @@ export async function openLFFolder() {
     if (lfInfo.version !== 1) return;
 
     fileMap = JSON.parse(decrypt(key, fs.readFileSync(`${path}/map.lfi`)).toString());
-    console.log(fileMap);
 
     lfFolderPath = path;
     cryptoKey = key;
     mainWindow!.webContents.send('changeLFFolder');
   } catch (e) {
+    dialog.showErrorBox('エラー', '読み込みに失敗しました');
     console.error(e);
   }
 }
