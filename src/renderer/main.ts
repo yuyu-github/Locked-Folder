@@ -2,7 +2,6 @@ let currentPath = '/';
 
 const listDiv = document.getElementById('list')!;
 listDiv.addEventListener('contextmenu', (e) => {
-  console.log('i');
   if (!api.isOpen()) return;
 
   api.showContextMenu('background', [
@@ -54,6 +53,13 @@ async function refresh() {
         ['delete', { label: '削除' }],
       ]);
     });
+
+    if (file.isDirectory) {
+      div.addEventListener('dblclick', () => {
+        currentPath += `/${file.name}`;
+        refresh();
+      });
+    }
   }
 }
 api.onChangeLFFolder(refresh);
