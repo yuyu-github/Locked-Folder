@@ -71,8 +71,8 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
   const file = getItem(path, name);
   if (!file || file.isDirectory) return;
 
-  if (!file.dataPath) file.dataPath = crypto.randomUUID();
-  const dataPath = joinPath(lfFolderPath, 'data', file.dataPath);
+  if (!file.dataName) file.dataName = crypto.randomUUID();
+  const dataPath = joinPath(lfFolderPath, 'data', file.dataName);
 
   let data: Buffer;
   if (fs.existsSync(dataPath)) {

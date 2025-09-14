@@ -12,7 +12,7 @@ interface FileData {
   isDirectory: boolean;
   lastModified: number;
   created: number;
-  dataPath?: string;
+  dataName?: string;
   children?: FileData[];
 }
 
@@ -22,7 +22,7 @@ export function createFileData(name: string): FileData {
     isDirectory: false,
     lastModified: Date.now(),
     created: Date.now(),
-    dataPath: crypto.randomUUID(),
+    dataName: crypto.randomUUID(),
   };
 }
 
@@ -168,7 +168,7 @@ export function getTmpFilePath(file: FileData): string {
     os.tmpdir(),
     'LockedFolder',
     lfFolderHash,
-    `${path.parse(file.name).name}_${file.dataPath}${path.extname(file.name)}`
+    `${path.parse(file.name).name}_${file.dataName}${path.extname(file.name)}`
   );
   return tmpFilePath;
 }
@@ -182,9 +182,9 @@ export function saveFileMap() {
 }
 
 export function saveFile(file: FileData, data: Buffer) {
-  if (!lfFolderPath || !cryptoKey || !file.dataPath) return;
+  if (!lfFolderPath || !cryptoKey || !file.dataName) return;
 
-  const dataPath = path.join(lfFolderPath, 'data', file.dataPath);
+  const dataPath = path.join(lfFolderPath, 'data', file.dataName);
   fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   fs.writeFileSync(dataPath, encrypt(cryptoKey, data));
 
@@ -205,10 +205,10 @@ chokidar.watch(path.join(os.tmpdir(), 'LockedFolder')).on('change', (filepath) =
 
 export function copyFile(file: FileData) {
   const newFile: FileData = { ...file };
-  if (file.dataPath) {
-    newFile.dataPath = crypto.randomUUID();
-    const oldDataPath = path.join(lfFolderPath!, 'data', file.dataPath!);
-    const newDataPath = path.join(lfFolderPath!, 'data', newFile.dataPath!);
+  if (file.dataName) {
+    newFile.dataName = crypto.randomUUID();
+    const oldDataPath = path.join(lfFolderPath!, 'data', file.dataName!);
+    const newDataPath = path.join(lfFolderPath!, 'data', newFile.dataName!);
     if (fs.existsSync(oldDataPath)) {
       fs.copyFileSync(oldDataPath, newDataPath);
     }
