@@ -19,6 +19,9 @@ interface IApi {
   onChangeLFFolder: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
   ) => Electron.IpcRenderer;
+  onRefresh: (
+    callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
+  ) => Electron.IpcRenderer;
 }
 
 interface FileData {

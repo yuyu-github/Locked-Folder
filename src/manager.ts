@@ -123,3 +123,11 @@ export function getChildren(path: string, mkfolder = false): FileData[] {
   }
   return current;
 }
+
+export function saveFileMap() {
+  if (!lfFolderPath || !cryptoKey) return;
+  fs.writeFileSync(
+    `${lfFolderPath}/map.lfi`,
+    encrypt(cryptoKey, Buffer.from(JSON.stringify(fileMap)))
+  );
+}

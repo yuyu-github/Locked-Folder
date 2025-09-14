@@ -62,4 +62,9 @@ async function refresh() {
     }
   }
 }
-api.onChangeLFFolder(refresh);
+api.onRefresh(refresh);
+
+api.onChangeLFFolder(() => {
+  currentPath = '/';
+  refresh();
+});

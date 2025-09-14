@@ -1,5 +1,12 @@
 import { ipcMain, Menu, MenuItemConstructorOptions } from "electron";
-import { createFileData, createFolderData, getChildren, getItem, lfFolderPath } from './manager.js';
+import {
+  createFileData,
+  createFolderData,
+  getChildren,
+  getItem,
+  lfFolderPath,
+  saveFileMap,
+} from './manager.js';
 import { showDialog } from './utils.js';
 import { mainWindow } from './window.js';
 
@@ -35,7 +42,9 @@ ipcMain.handle('newFile', async (e, path: string) => {
   if (!name) return;
 
   getChildren(path, true).push(createFileData(path, name));
-  mainWindow!.webContents.send('changeLFFolder');
+
+  saveFileMap();
+  mainWindow!.webContents.send('refresh');
 });
 
 ipcMain.handle('newFolder', async (e, path: string) => {
@@ -43,7 +52,9 @@ ipcMain.handle('newFolder', async (e, path: string) => {
   if (!name) return;
 
   getChildren(path, true).push(createFolderData(path, name));
-  mainWindow!.webContents.send('changeLFFolder');
+
+  saveFileMap();
+  mainWindow!.webContents.send('refresh');
 });
 
 ipcMain.handle('rename', async (e, path: string, name: string) => {
@@ -54,7 +65,9 @@ ipcMain.handle('rename', async (e, path: string, name: string) => {
 
   const file = getItem(path, name);
   if (file) file.name = newName;
-  mainWindow!.webContents.send('changeLFFolder');
+
+  saveFileMap();
+  mainWindow!.webContents.send('refresh');
 });
 
 ipcMain.handle('delete', async (e, path: string, name: string) => {
@@ -62,5 +75,7 @@ ipcMain.handle('delete', async (e, path: string, name: string) => {
   for (let i = children.length - 1; i >= 0; i--) {
     if (children[i].name === name) children.splice(i, 1);
   }
-  mainWindow!.webContents.send('changeLFFolder');
+
+  saveFileMap();
+  mainWindow!.webContents.send('refresh');
 });
