@@ -12,14 +12,11 @@ filelistDiv.addEventListener('contextmenu', (e) => {
   ]);
 });
 
-async function update() {
-  if (!api.isOpen()) {
-    filelistDiv.innerHTML = '';
-    return;
-  }
+export async function update() {
+  filelistDiv.innerHTML = '';
+  if (!api.isOpen()) return;
 
   const files = await api.getFiles(currentPath);
-  filelistDiv.innerHTML = '';
   for (let file of files) {
     const div = document.createElement('div');
     div.textContent = file.name;
@@ -39,7 +36,6 @@ async function update() {
 
       div.addEventListener('dblclick', () => {
         setCurrentPath(currentPath + `${file.name}/`);
-        update();
       });
     } else {
       div.addEventListener('contextmenu', (e) => {
@@ -65,5 +61,4 @@ api.onUpdate(update);
 
 api.onChangeLFFolder(() => {
   setCurrentPath('/');
-  update();
 });

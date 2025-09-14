@@ -1,4 +1,7 @@
-import './addressbar.js';
+import { updateAddressbar } from './addressbar.js';
 import './contextmenu.js';
-import './filelist.js';
+import { update } from './filelist.js';
 import './manager.js';
+
+update();
+updateAddressbar();

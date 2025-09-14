@@ -1,0 +1,36 @@
+import { currentPath, setCurrentPath } from "./manager.js";
+
+const addressbarDiv = document.getElementById('addressbar')!;
+
+export function updateAddressbar() {
+  addressbarDiv.innerHTML = '';
+  if (!api.isOpen()) return;
+
+  const parts = currentPath.split('/')
+  if (!parts.at(-1)) parts.pop();
+
+  let stack = '/';
+  for (let i = 0; i < parts.length; i++) {
+    if (i !== 0) {
+      const sepDiv = document.createElement('div');
+      sepDiv.textContent = '>';
+      sepDiv.className = 'sep';
+      addressbarDiv.appendChild(sepDiv);
+      stack += parts[i] + '/';
+    }
+
+    const nameDiv = document.createElement('div');
+    if (i === 0) {
+      nameDiv.className = 'root-slash';
+      nameDiv.textContent = '/';
+    } else {
+      nameDiv.textContent = parts[i];
+    }
+    addressbarDiv.appendChild(nameDiv);
+
+    const path = stack;
+    nameDiv.addEventListener('click', () => {
+      setCurrentPath(path);
+    })
+  }
+}
