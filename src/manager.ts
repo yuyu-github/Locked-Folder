@@ -1,3 +1,4 @@
+import chokidar from 'chokidar';
 import crypto, { randomUUID } from 'crypto';
 import { dialog } from 'electron';
 import fs from 'fs';
@@ -41,6 +42,7 @@ export function createFolderData(path: string, name: string): FileData {
 export let lfFolderPath: string | null = null;
 export let cryptoKey: Buffer | null = null;
 export let fileMap: FileData[] = [];
+export let openedFiles: Record<string, FileData> = {};
 
 export async function createNewLFFolder() {
   //LFを作成する場所を選択させて、そのパスを取得
@@ -74,6 +76,7 @@ export async function createNewLFFolder() {
 
   fs.writeFileSync(`${lfFolderPath}/map.lfi`, encrypt(cryptoKey, Buffer.from('[]')));
 
+  deleteTmpFiles();
   mainWindow!.webContents.send('changeLFFolder');
 }
 
@@ -96,12 +99,29 @@ export async function openLFFolder() {
 
     fileMap = JSON.parse(decrypt(key, fs.readFileSync(`${path}/map.lfi`)).toString());
 
+    deleteTmpFiles();
+
     lfFolderPath = path;
     cryptoKey = key;
     mainWindow!.webContents.send('changeLFFolder');
   } catch (e) {
     dialog.showErrorBox('エラー', '読み込みに失敗しました');
     console.error(e);
+  }
+}
+
+export function deleteTmpFiles(all = false) {
+  if (all) {
+    const tmpDir = path.join(os.tmpdir(), 'LockedFolder');
+    if (fs.existsSync(tmpDir)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  } else {
+    for (let f in openedFiles) {
+      if (fs.existsSync(f)) {
+        fs.rmSync(f);
+      }
+    }
   }
 }
 
@@ -149,3 +169,25 @@ export function saveFileMap() {
     encrypt(cryptoKey, Buffer.from(JSON.stringify(fileMap)))
   );
 }
+
+export function saveFile(file: FileData, data: Buffer) {
+  if (!lfFolderPath || !cryptoKey || !file.dataPath) return;
+
+  const dataPath = path.join(lfFolderPath, 'data', file.dataPath);
+  fs.mkdirSync(path.dirname(dataPath), { recursive: true });
+  fs.writeFileSync(dataPath, encrypt(cryptoKey, data));
+
+  file.lastModified = Date.now();
+  saveFileMap();
+}
+
+chokidar.watch(path.join(os.tmpdir(), 'LockedFolder')).on('change', (filepath) => {
+  if (filepath in openedFiles && lfFolderPath && cryptoKey) {
+    try {
+      const data = fs.readFileSync(filepath);
+      saveFile(openedFiles[filepath], data);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});

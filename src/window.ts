@@ -1,7 +1,7 @@
 import { BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from 'path';
 import { env } from 'process';
-import { createNewLFFolder, openLFFolder } from "./manager.js";
+import { createNewLFFolder, deleteTmpFiles, openLFFolder } from './manager.js';
 
 export let mainWindow: BrowserWindow | null;
 
@@ -9,9 +9,9 @@ export function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 700,
-    title: "Locked Folder",
+    title: 'Locked Folder',
     webPreferences: {
-      preload: path.join(__dirname, "preload/preload.cjs"),
+      preload: path.join(__dirname, 'preload/preload.cjs'),
     },
   });
 
@@ -33,23 +33,24 @@ export function createMainWindow() {
     },
   ];
 
-  if (env.TYPE == "debug") {
+  if (env.TYPE == 'debug') {
     menuData.push({
-      label: "デバッグ",
+      label: 'デバッグ',
       submenu: [
-        { label: "デベロッパーツール", role: "toggleDevTools" },
-        { label: "再読み込み", role: "reload" },
+        { label: 'デベロッパーツール', role: 'toggleDevTools' },
+        { label: '再読み込み', role: 'reload' },
       ],
     });
   }
 
   let menu = Menu.buildFromTemplate(menuData);
-  if (process.platform == "darwin") Menu.setApplicationMenu(menu);
+  if (process.platform == 'darwin') Menu.setApplicationMenu(menu);
   else mainWindow.setMenu(menu);
 
-  mainWindow.loadFile(path.join(__dirname, "renderer/index.html"));
+  mainWindow.loadFile(path.join(__dirname, 'renderer/index.html'));
 
-  mainWindow.on("closed", () => {
+  mainWindow.on('closed', () => {
+    deleteTmpFiles(true);
     mainWindow = null;
   });
 }

@@ -9,6 +9,7 @@ import {
   getItem,
   getTmpFilePath,
   lfFolderPath,
+  openedFiles,
   saveFileMap,
 } from './manager.js';
 import { decrypt, showDialog } from './utils.js';
@@ -81,6 +82,7 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
   fs.mkdirSync(dirname(tmpFilePath), { recursive: true });
   fs.writeFileSync(tmpFilePath, data);
   shell.openPath(tmpFilePath);
+  openedFiles[tmpFilePath] = file;
 });
 
 ipcMain.handle('rename', async (e, path: string, name: string) => {

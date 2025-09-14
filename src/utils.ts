@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { BrowserWindow, ipcMain } from "electron";
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 
 export function encrypt(key: Buffer, data: Buffer): Buffer {
@@ -17,8 +16,6 @@ export function decrypt(key: Buffer, data: Buffer): Buffer {
   const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]);
 }
-
-export function openFile(path: string) {}
 
 export async function showDialog<T>(
   parent: BrowserWindow,
