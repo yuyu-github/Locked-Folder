@@ -1,14 +1,20 @@
 <body>
-  <input id="text" type="text" />
+  <input id="text" type="text" autofocus />
   <button id="ok">OK</button>
   <script>
     const { ipcRenderer } = require('electron');
+    
     const textInput = document.getElementById('text')
     textInput.value = process.argv.find(arg => arg.startsWith('--default='))?.split('=')[1] ?? '';
+
     document.getElementById('ok').addEventListener('click', () => {
       const value = textInput.value;
       if (value.trim() === '') return;
       ipcRenderer.send('return', value);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('ok').click();
     });
   </script>
 </body>

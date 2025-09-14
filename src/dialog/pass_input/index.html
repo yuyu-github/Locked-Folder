@@ -1,12 +1,17 @@
 <body>
-  <input id="pass" type="password" />
+  <input id="pass" type="password" autofocus />
   <button id="ok">OK</button>
   <script>
     const { ipcRenderer } = require('electron');
+    
     document.getElementById('ok').addEventListener('click', () => {
       const value = document.getElementById('pass').value;
       if (value.trim() === '') return;
       ipcRenderer.send('return', value);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('ok').click();
     });
   </script>
 </body>
