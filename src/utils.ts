@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { BrowserWindow, ipcMain } from "electron";
 import fs from 'fs';
 import path from 'path';
+import { getChildren } from './manager.js';
 
 export function encrypt(key: Buffer, data: Buffer): Buffer {
   const iv = crypto.randomBytes(16);
@@ -15,6 +16,15 @@ export function decrypt(key: Buffer, data: Buffer): Buffer {
   const encrypted = data.subarray(16);
   const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]);
+}
+export function nameResolve(parent: string, name: string) {
+  const children = getChildren(parent);
+  let i = 1;
+  while (children.some((i) => i.name === name)) {
+    const parsed = path.parse(name);
+    name = `${parsed.name} (${i++})${parsed.ext}`;
+  }
+  return name;
 }
 
 export async function showDialog<T>(
