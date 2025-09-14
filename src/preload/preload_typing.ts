@@ -23,7 +23,7 @@ interface IApi {
   onChangeLFFolder: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
   ) => Electron.IpcRenderer;
-  onRefresh: (
+  onUpdate: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
   ) => Electron.IpcRenderer;
 }

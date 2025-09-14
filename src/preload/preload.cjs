@@ -15,5 +15,5 @@ contextBridge.exposeInMainWorld('api', {
 
   onContextMenuClick: callback => ipcRenderer.on('contextMenuClick', callback),
   onChangeLFFolder: callback => ipcRenderer.on('changeLFFolder', callback),
-  onRefresh: callback => ipcRenderer.on('refresh', callback),
+  onUpdate: callback => ipcRenderer.on('update', callback),
 });

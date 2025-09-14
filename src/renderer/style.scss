@@ -5,7 +5,27 @@ body {
   height: 100%;
 }
 
-#list {
+.v-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.h-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+#addressbar {
+  height: 25px;
+  margin: 5px;
+  border: 1px solid #ccc;
+}
+
+#filelist {
   width: 100%;
   height: 100%;
 }

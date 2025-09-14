@@ -1,7 +1,7 @@
 import { currentPath, setCurrentPath } from "./manager.js";
 
-const listDiv = document.getElementById('list')!;
-listDiv.addEventListener('contextmenu', (e) => {
+const filelistDiv = document.getElementById('filelist')!;
+filelistDiv.addEventListener('contextmenu', (e) => {
   if (!api.isOpen()) return;
 
   api.showContextMenu('background', [
@@ -12,18 +12,18 @@ listDiv.addEventListener('contextmenu', (e) => {
   ]);
 });
 
-async function refresh() {
+async function update() {
   if (!api.isOpen()) {
-    listDiv.innerHTML = '';
+    filelistDiv.innerHTML = '';
     return;
   }
 
   const files = await api.getFiles(currentPath);
-  listDiv.innerHTML = '';
+  filelistDiv.innerHTML = '';
   for (let file of files) {
     const div = document.createElement('div');
     div.textContent = file.name;
-    listDiv.appendChild(div);
+    filelistDiv.appendChild(div);
 
     if (file.isDirectory) {
       div.addEventListener('contextmenu', (e) => {
@@ -39,7 +39,7 @@ async function refresh() {
 
       div.addEventListener('dblclick', () => {
         setCurrentPath(currentPath + `${file.name}/`);
-        refresh();
+        update();
       });
     } else {
       div.addEventListener('contextmenu', (e) => {
@@ -61,9 +61,9 @@ async function refresh() {
     }
   }
 }
-api.onRefresh(refresh);
+api.onUpdate(update);
 
 api.onChangeLFFolder(() => {
   setCurrentPath('/');
-  refresh();
+  update();
 });

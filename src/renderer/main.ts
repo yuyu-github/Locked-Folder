@@ -1,3 +1,4 @@
+import './addressbar.js';
 import './contextmenu.js';
-import './list.js';
+import './filelist.js';
 import './manager.js';

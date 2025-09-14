@@ -52,7 +52,7 @@ ipcMain.handle('newFile', async (e, path: string) => {
   getChildren(path, true).push(createFileData(nameResolve(path, name)));
 
   saveFileMap();
-  mainWindow!.webContents.send('refresh');
+  mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('newFolder', async (e, path: string) => {
@@ -62,7 +62,7 @@ ipcMain.handle('newFolder', async (e, path: string) => {
   getChildren(path, true).push(createFolderData(nameResolve(path, name)));
 
   saveFileMap();
-  mainWindow!.webContents.send('refresh');
+  mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('open', async (e, path: string, name: string) => {
@@ -99,7 +99,7 @@ ipcMain.handle('cut', (e, path: string, name: string) => {
   }
 
   saveFileMap();
-  mainWindow!.webContents.send('refresh');
+  mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('copy', (e, path: string, name: string) => {
@@ -116,7 +116,7 @@ ipcMain.handle('paste', (e, path: string) => {
   }
 
   saveFileMap();
-  mainWindow!.webContents.send('refresh');
+  mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('rename', async (e, path: string, name: string) => {
@@ -129,7 +129,7 @@ ipcMain.handle('rename', async (e, path: string, name: string) => {
   if (file) file.name = nameResolve(path, newName);
 
   saveFileMap();
-  mainWindow!.webContents.send('refresh');
+  mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('delete', async (e, path: string, name: string) => {
@@ -139,5 +139,5 @@ ipcMain.handle('delete', async (e, path: string, name: string) => {
   }
 
   saveFileMap();
-  mainWindow!.webContents.send('refresh');
+  mainWindow!.webContents.send('update');
 });
