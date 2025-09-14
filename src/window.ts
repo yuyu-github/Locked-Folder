@@ -17,17 +17,17 @@ export function createMainWindow() {
 
   const menuData: MenuItemConstructorOptions[] = [
     {
-      label: "ファイル",
+      label: 'LFフォルダ',
       submenu: [
         {
-          label: "新規作成",
+          label: '新規作成',
           click: createNewLFFolder,
-          accelerator: "CommandOrControl+N",
+          accelerator: 'CommandOrControl+N',
         },
         {
-          label: "開く",
+          label: '開く',
           click: openLFFolder,
-          accelerator: "CommandOrControl+O",
+          accelerator: 'CommandOrControl+O',
         },
       ],
     },
