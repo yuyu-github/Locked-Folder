@@ -1,6 +1,8 @@
 import crypto, { randomUUID } from 'crypto';
 import { dialog } from 'electron';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { decrypt, encrypt, showDialog } from './utils.js';
 import { mainWindow } from './window.js';
 
@@ -127,6 +129,17 @@ export function getChildren(path: string, mkfolder = false): FileData[] {
     }
   }
   return current;
+}
+
+export function getTmpFilePath(file: FileData): string {
+  const lfFolderHash = crypto.createHash('sha256').update(lfFolderPath!).digest('hex');
+  const tmpFilePath = path.join(
+    os.tmpdir(),
+    'LockedFolder',
+    lfFolderHash,
+    `${path.parse(file.name).name}_${file.dataPath}${path.extname(file.name)}`
+  );
+  return tmpFilePath;
 }
 
 export function saveFileMap() {

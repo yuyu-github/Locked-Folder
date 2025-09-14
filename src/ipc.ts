@@ -1,13 +1,17 @@
-import { ipcMain, Menu, MenuItemConstructorOptions } from "electron";
+import { ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
+import fs from 'fs';
+import { dirname, join as joinPath } from 'path';
 import {
   createFileData,
   createFolderData,
+  cryptoKey,
   getChildren,
   getItem,
+  getTmpFilePath,
   lfFolderPath,
   saveFileMap,
 } from './manager.js';
-import { showDialog } from './utils.js';
+import { decrypt, showDialog } from './utils.js';
 import { mainWindow } from './window.js';
 
 ipcMain.on('isOpen', (event) => {
@@ -55,6 +59,28 @@ ipcMain.handle('newFolder', async (e, path: string) => {
 
   saveFileMap();
   mainWindow!.webContents.send('refresh');
+});
+
+ipcMain.handle('open', async (e, path: string, name: string) => {
+  if (!lfFolderPath || !cryptoKey) return;
+
+  const file = getItem(path, name);
+  if (!file || file.isDirectory) return;
+
+  if (!file.dataPath) file.dataPath = crypto.randomUUID();
+  const dataPath = joinPath(lfFolderPath, 'data', file.dataPath);
+
+  let data: Buffer;
+  if (fs.existsSync(dataPath)) {
+    data = decrypt(cryptoKey!, fs.readFileSync(dataPath));
+  } else {
+    data = Buffer.from('');
+  }
+
+  const tmpFilePath = getTmpFilePath(file);
+  fs.mkdirSync(dirname(tmpFilePath), { recursive: true });
+  fs.writeFileSync(tmpFilePath, data);
+  shell.openPath(tmpFilePath);
 });
 
 ipcMain.handle('rename', async (e, path: string, name: string) => {

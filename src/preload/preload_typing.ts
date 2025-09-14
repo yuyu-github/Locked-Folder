@@ -10,6 +10,7 @@ interface IApi {
   getFiles: (path: string) => Promise<FileData[]>;
   newFile: (path: string) => Promise<void>;
   newFolder: (path: string) => Promise<void>;
+  open: (path: string, name: string) => Promise<void>;
   rename: (path: string, name: string) => Promise<void>;
   delete: (path: string, name: string) => Promise<void>;
 

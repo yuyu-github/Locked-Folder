@@ -10,28 +10,6 @@ listDiv.addEventListener('contextmenu', (e) => {
   ]);
 });
 
-api.onContextMenuClick((e, caller, id) => {
-  switch (id) {
-    case 'newFile': {
-      api.newFile(currentPath);
-      break;
-    }
-    case 'newFolder': {
-      api.newFolder(currentPath);
-      break;
-    }
-    case 'rename': {
-      const filename = caller.split('-')[1];
-      api.rename(currentPath, filename);
-      break;
-    }
-    case 'delete': {
-      const filename = caller.split('-')[1];
-      api.delete(currentPath, filename);
-      break;
-    }
-  }
-});
 
 async function refresh() {
   if (!api.isOpen()) {
@@ -46,18 +24,28 @@ async function refresh() {
     div.textContent = file.name;
     listDiv.appendChild(div);
 
-    div.addEventListener('contextmenu', (e) => {
-      e.stopPropagation();
-      api.showContextMenu(`file-${file.name}`, [
-        ['rename', { label: '名前を変更' }],
-        ['delete', { label: '削除' }],
-      ]);
-    });
-
     if (file.isDirectory) {
+      div.addEventListener('contextmenu', (e) => {
+        e.stopPropagation();
+        api.showContextMenu(`folder-${file.name}`, [
+          ['rename', { label: '名前を変更' }],
+          ['delete', { label: '削除' }],
+        ]);
+      });
+
       div.addEventListener('dblclick', () => {
         currentPath += `${file.name}/`;
         refresh();
+      });
+    } else {
+      div.addEventListener('contextmenu', (e) => {
+        e.stopPropagation();
+        api.showContextMenu(`file-${file.name}`, [
+          ['open', { label: '開く' }],
+          ['', { type: 'separator' }],
+          ['rename', { label: '名前を変更' }],
+          ['delete', { label: '削除' }],
+        ]);
       });
     }
   }
@@ -67,4 +55,32 @@ api.onRefresh(refresh);
 api.onChangeLFFolder(() => {
   currentPath = '/';
   refresh();
+});
+
+api.onContextMenuClick((e, caller, id) => {
+  switch (id) {
+    case 'newFile': {
+      api.newFile(currentPath);
+      break;
+    }
+    case 'newFolder': {
+      api.newFolder(currentPath);
+      break;
+    }
+    case 'open': {
+      const name = caller.split('-')[1];
+      api.open(currentPath, name);
+      break;
+    }
+    case 'rename': {
+      const name = caller.split('-')[1];
+      api.rename(currentPath, name);
+      break;
+    }
+    case 'delete': {
+      const name = caller.split('-')[1];
+      api.delete(currentPath, name);
+      break;
+    }
+  }
 });
