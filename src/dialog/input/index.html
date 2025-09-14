@@ -3,8 +3,10 @@
   <button id="ok">OK</button>
   <script>
     const { ipcRenderer } = require('electron');
+    const textInput = document.getElementById('text')
+    textInput.value = process.argv.find(arg => arg.startsWith('--default='))?.split('=')[1] ?? '';
     document.getElementById('ok').addEventListener('click', () => {
-      const value = document.getElementById('text').value;
+      const value = textInput.value;
       if (value.trim() === '') return;
       ipcRenderer.send('return', value);
     });

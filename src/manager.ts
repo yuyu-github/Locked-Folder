@@ -53,6 +53,7 @@ export async function createNewLFFolder() {
   if (!lfFolderName) return;
 
   const pass = await showDialog<string>(mainWindow!, 'pass_input', 'パスワードを設定');
+  if (!pass) return;
   if (pass != (await showDialog<string>(mainWindow!, 'pass_input', 'パスワードを確認'))) {
     dialog.showErrorBox('エラー', 'パスワードが一致しません');
     return;
@@ -85,6 +86,7 @@ export async function openLFFolder() {
     const path = result[0];
 
     const pass = await showDialog<string>(mainWindow!, 'pass_input', 'パスワードを入力');
+    if (!pass) return;
     const key = crypto.scryptSync(pass, 'salt', 32);
 
     const lfInfo = JSON.parse(fs.readFileSync(`${path}/lfinfo.json`, 'utf-8'));
@@ -98,4 +100,26 @@ export async function openLFFolder() {
   } catch (e) {
     console.error(e);
   }
+}
+
+export function getItem(path: string, name: string): FileData | null {
+  let current = fileMap;
+  for (let i in path.replace(/^\/|\/$/g, '').split('/')) {
+    current = current.find((f) => f.isDirectory && f.name === i)?.children || [];
+  }
+  return current.find((f) => f.name === name) ?? null;
+}
+
+export function getChildren(path: string, mkfolder = false): FileData[] {
+  let current = fileMap;
+  for (let i in path.replace(/^\/|\/$/g, '').split('/')) {
+    let child = current.find((f) => f.isDirectory && f.name === i);
+    if (!child) {
+      child = createFolderData(path, i);
+      current.push(child);
+    }
+    if (!child.children) child.children = [];
+    current = child.children;
+  }
+  return current;
 }

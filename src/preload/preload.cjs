@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('api', {
   getFiles: (...params) => ipcRenderer.invoke('getFiles', ...params),
   newFile: (...params) => ipcRenderer.invoke('newFile', ...params),
   newFolder: (...params) => ipcRenderer.invoke('newFolder', ...params),
+  rename: (...params) => ipcRenderer.invoke('rename', ...params),
+  delete: (...params) => ipcRenderer.invoke('delete', ...params),
 
   onContextMenuClick: callback => ipcRenderer.on('contextMenuClick', callback),
   onChangeLFFolder: callback => ipcRenderer.on('changeLFFolder', callback),

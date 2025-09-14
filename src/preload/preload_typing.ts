@@ -6,10 +6,12 @@ declare global {
 
 interface IApi {
   isOpen: () => boolean;
-  showContextMenu: (data: [string, MenuItemConstructorOptions][]) => Promise<void>;
+  showContextMenu: (caller: string, data: [string, MenuItemConstructorOptions][]) => Promise<void>;
   getFiles: (path: string) => Promise<FileData[]>;
   newFile: (path: string) => Promise<void>;
   newFolder: (path: string) => Promise<void>;
+  rename: (path: string, name: string) => Promise<void>;
+  delete: (path: string, name: string) => Promise<void>;
 
   onContextMenuClick: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void

@@ -17,8 +17,15 @@ export function decrypt(key: Buffer, data: Buffer): Buffer {
   return Buffer.concat([decipher.update(encrypted), decipher.final()]);
 }
 
-export async function showDialog<T>(parent: BrowserWindow, name: string, title: string): Promise<T> {
-  const options = JSON.parse(fs.readFileSync(path.join(__dirname, `dialog/${name}/options.json`), 'utf-8'));
+export async function showDialog<T>(
+  parent: BrowserWindow,
+  name: string,
+  title: string,
+  args: Record<string, string> = {}
+): Promise<T | null> {
+  const options = JSON.parse(
+    fs.readFileSync(path.join(__dirname, `dialog/${name}/options.json`), 'utf-8')
+  );
   const win = new BrowserWindow({
     width: options.width,
     height: options.height,
@@ -26,17 +33,27 @@ export async function showDialog<T>(parent: BrowserWindow, name: string, title: 
     title,
     modal: true,
     resizable: false,
-    webPreferences: { nodeIntegration: true, contextIsolation: false }
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      additionalArguments: Object.entries(args).map(([k, v]) => `--${k}=${v}`),
+    },
   });
   win.setMenu(null);
   win.loadFile(path.join(__dirname, `dialog/${name}/index.html`));
 
-  return new Promise(resolve => {
-    ipcMain.once('return', (e, value) => {
+  return new Promise((resolve) => {
+    function onReturn(e, value) {
       if (e.sender === win.webContents) {
         resolve(value);
+        ipcMain.removeListener('return', onReturn);
         win.close();
       }
+    }
+    ipcMain.on('return', onReturn);
+    win.on('closed', () => {
+      resolve(null);
+      ipcMain.removeListener('return', onReturn);
     });
   });
 }

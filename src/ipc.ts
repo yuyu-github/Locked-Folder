@@ -1,5 +1,5 @@
 import { ipcMain, Menu, MenuItemConstructorOptions } from "electron";
-import { createFileData, createFolderData, fileMap, lfFolderPath } from './manager.js';
+import { createFileData, createFolderData, getChildren, getItem, lfFolderPath } from './manager.js';
 import { showDialog } from './utils.js';
 import { mainWindow } from './window.js';
 
@@ -7,24 +7,22 @@ ipcMain.on('isOpen', (event) => {
   event.returnValue = lfFolderPath !== null;
 });
 
-ipcMain.handle('showContextMenu', (e, data: [string, MenuItemConstructorOptions][]) => {
-  const options = data.map(([id, option]) => ({
-    ...option,
-    click: () => {
-      e.sender.send('contextMenuClick', id);
-    },
-  }));
-  const menu = Menu.buildFromTemplate(options);
-  menu.popup({ window: mainWindow! });
-});
+ipcMain.handle(
+  'showContextMenu',
+  (e, caller: string, data: [string, MenuItemConstructorOptions][]) => {
+    const options = data.map(([id, option]) => ({
+      ...option,
+      click: () => {
+        e.sender.send('contextMenuClick', caller, id);
+      },
+    }));
+    const menu = Menu.buildFromTemplate(options);
+    menu.popup({ window: mainWindow! });
+  }
+);
 
 ipcMain.handle('getFiles', (e, path: string) => {
-  let current = fileMap;
-  for (let i in path.split('/').slice(1)) {
-    current = current.find((f) => f.isDirectory && f.name === i)?.children || [];
-  }
-
-  return current.map((i) => ({
+  return getChildren(path).map((i) => ({
     name: i.name,
     lastModified: i.lastModified,
     created: i.created,
@@ -36,19 +34,7 @@ ipcMain.handle('newFile', async (e, path: string) => {
   const name = await showDialog<string>(mainWindow!, 'input', 'ファイル名を入力');
   if (!name) return;
 
-  let current = fileMap;
-  for (let i in path.split('/').slice(1)) {
-    let child = current.find((f) => f.isDirectory && f.name === i);
-    if (!child) {
-      child = createFolderData(path, i);
-      current.push(child);
-    }
-    if (!child.children) child.children = [];
-    current = child.children;
-  }
-
-  current.push(createFileData(path, name));
-
+  getChildren(path, true).push(createFileData(path, name));
   mainWindow!.webContents.send('changeLFFolder');
 });
 
@@ -56,17 +42,25 @@ ipcMain.handle('newFolder', async (e, path: string) => {
   const name = await showDialog<string>(mainWindow!, 'input', 'フォルダ名を入力');
   if (!name) return;
 
-  let current = fileMap;
-  for (let i in path.split('/').slice(1)) {
-    let child = current.find((f) => f.isDirectory && f.name === i);
-    if (!child) {
-      child = createFolderData(path, i);
-      current.push(child);
-    }
-    if (!child.children) child.children = [];
-    current = child.children;
-  }
-  current.push(createFolderData(path, name));
+  getChildren(path, true).push(createFolderData(path, name));
+  mainWindow!.webContents.send('changeLFFolder');
+});
 
+ipcMain.handle('rename', async (e, path: string, name: string) => {
+  const newName = await showDialog<string>(mainWindow!, 'input', '新しい名前を入力', {
+    default: name,
+  });
+  if (!newName) return;
+
+  const file = getItem(path, name);
+  if (file) file.name = newName;
+  mainWindow!.webContents.send('changeLFFolder');
+});
+
+ipcMain.handle('delete', async (e, path: string, name: string) => {
+  const children = getChildren(path);
+  for (let i = children.length - 1; i >= 0; i--) {
+    if (children[i].name === name) children.splice(i, 1);
+  }
   mainWindow!.webContents.send('changeLFFolder');
 });

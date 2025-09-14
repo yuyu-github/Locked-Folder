@@ -1,23 +1,36 @@
 let currentPath = '/';
 
 const listDiv = document.getElementById('list')!;
-listDiv.addEventListener('contextmenu', () => {
+listDiv.addEventListener('contextmenu', (e) => {
+  console.log('i');
   if (!api.isOpen()) return;
 
-  api.showContextMenu([
+  api.showContextMenu('background', [
     ['newFile', { label: 'ファイルを作成' }],
     ['newFolder', { label: 'フォルダを作成' }],
   ]);
 });
 
-api.onContextMenuClick((e, id) => {
+api.onContextMenuClick((e, caller, id) => {
   switch (id) {
-    case 'newFile':
+    case 'newFile': {
       api.newFile(currentPath);
       break;
-    case 'newFolder':
+    }
+    case 'newFolder': {
       api.newFolder(currentPath);
       break;
+    }
+    case 'rename': {
+      const filename = caller.split('-')[1];
+      api.rename(currentPath, filename);
+      break;
+    }
+    case 'delete': {
+      const filename = caller.split('-')[1];
+      api.delete(currentPath, filename);
+      break;
+    }
   }
 });
 
@@ -33,6 +46,14 @@ async function refresh() {
     const div = document.createElement('div');
     div.textContent = file.name;
     listDiv.appendChild(div);
+
+    div.addEventListener('contextmenu', (e) => {
+      e.stopPropagation();
+      api.showContextMenu(`file-${file.name}`, [
+        ['rename', { label: '名前を変更' }],
+        ['delete', { label: '削除' }],
+      ]);
+    });
   }
 }
 api.onChangeLFFolder(refresh);
