@@ -1,1 +1,11 @@
-/*# sourceMappingURL=style.css.map */
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#list {
+  width: 100%;
+  height: 100%;
+}/*# sourceMappingURL=style.css.map */
