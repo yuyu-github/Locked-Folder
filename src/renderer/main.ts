@@ -47,6 +47,10 @@ async function refresh() {
           ['delete', { label: '削除' }],
         ]);
       });
+
+      div.addEventListener('dblclick', () => {
+        api.open(currentPath, file.name);
+      });
     }
   }
 }
