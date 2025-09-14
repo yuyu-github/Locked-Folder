@@ -18,7 +18,12 @@ export function decrypt(key: Buffer, data: Buffer): Buffer {
   return Buffer.concat([decipher.update(encrypted), decipher.final()]);
 }
 
+export function escapeName(name: string) {
+  return name.replace(/[\/\\?%*:|"<>]/g, '_');
+}
+
 export function nameResolve(parent: string, name: string) {
+  name = escapeName(name);
   const children = getChildren(parent);
   let i = 1;
   while (children.some((i) => i.name === name)) {
