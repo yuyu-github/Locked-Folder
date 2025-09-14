@@ -14,14 +14,29 @@ body > div {
 .h-container {
   display: flex;
   flex-direction: row;
+  align-items: center;
+}
+
+#back, #forward {
+  width: 20px;
+  height: 25px;
+  border: none;
+  padding: 2px;
+  padding-top: 0;
+  background-color: transparent;
+}
+#back:hover, #forward:hover {
+  background-color: #eee;
+  cursor: pointer;
 }
 
 #addressbar {
   height: 20px;
-  margin: 5px;
-  padding: 2px 2px;
-  padding-top: 0px;
+  margin: 4px;
+  padding: 2px;
+  padding-top: 0;
   font-size: 10pt;
+  flex-grow: 1;
   border: 1px solid #ccc;
 }
 #addressbar div {
