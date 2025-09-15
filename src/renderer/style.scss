@@ -1,5 +1,7 @@
 $hover-color: #e5f3ff;
 $hover-outline-color: #000;
+$select-color: #cce8ff;
+$select-outline-color: #000;
 
 html,
 body,
@@ -74,8 +76,11 @@ body {
   overflow: auto;
 }
 
-#filelist {
+#fl-outer {
   display: none;
+}
+
+#filelist {
   display: table;
   font-size: 10pt;
 }
@@ -88,8 +93,15 @@ body {
 #fl-contents {
   display: table-row-group;
 
-  > div > div:first-child:hover {
-    background-color: $hover-color;
+  .name-outer {
+    &:hover {
+      background-color: $hover-color;
+    }
+
+    &.selected {
+      background-color: $select-color;
+      outline: 1px solid 
+    }
   }
 }
 
@@ -97,7 +109,6 @@ body {
   > div {
     display: table-row;
     height: 22px;
-    padding: 1px 0;
     line-height: 20px;
 
     > div {

@@ -1,5 +1,5 @@
 import { updateAddressbar } from './addressbar.js';
-import { update } from './filelist.js';
+import { selectedFiles, update } from './filelist.js';
 
 export let currentPath = '/';
 
@@ -11,6 +11,7 @@ export function setCurrentPath(path: string, stack = true) {
   if (!path.endsWith('/')) path += '/';
 
   if (stack && currentPath !== path) {
+    selectedFiles.clear();
     backStack.push(currentPath);
     forwardStack = [];
   }
@@ -29,4 +30,10 @@ document.getElementById('forward')!.addEventListener('click', () => {
   if (forwardStack.length == 0) return;
   backStack.push(currentPath);
   setCurrentPath(forwardStack.pop()!, false);
+});
+
+api.onChangeLFFolder(() => {
+  setCurrentPath('/');
+  backStack = [];
+  forwardStack = [];
 });

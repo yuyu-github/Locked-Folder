@@ -15,8 +15,11 @@ async function getIcon(file: FileData) {
   }
 }
 
+
+export const selectedFiles: Set<string> = new Set();
+
 const flBackgroundDiv = document.getElementById('fl-background')!;
-const filelistDiv = document.getElementById('filelist')!;
+const flOuterDiv = document.getElementById('fl-outer')!;
 const flContentsDiv = document.getElementById('fl-contents')!;
 
 flBackgroundDiv.addEventListener('contextmenu', (e) => {
@@ -32,22 +35,30 @@ flBackgroundDiv.addEventListener('contextmenu', (e) => {
   ]);
 });
 
+flBackgroundDiv.addEventListener('click', () => {
+  selectedFiles.clear();
+  update();
+});
+
 export async function update() {
-  flContentsDiv.innerHTML = '';
-  
+  const flagment = document.createDocumentFragment();
+
   if (!api.isOpen()) {
-    filelistDiv.style.display = 'none';
+    flOuterDiv.style.display = 'none';
     return;
   }
-  filelistDiv.style.display = 'block';
+  flOuterDiv.style.display = 'block';
 
   const files = await api.getFiles(currentPath);
+  const fileNames = files.map(f => f.name);
+
   for (let file of files) {
     const div = document.createElement('div');
-    flContentsDiv.appendChild(div);
+    flagment.appendChild(div);
 
     const nameOuterDiv = document.createElement('div');
     nameOuterDiv.classList.add('name-outer');
+    if (selectedFiles.has(file.name)) nameOuterDiv.classList.add('selected');
     const nameOuterFlexDiv = document.createElement('div');
     nameOuterFlexDiv.classList.add('h-container');
     nameOuterDiv.appendChild(nameOuterFlexDiv);
@@ -109,10 +120,29 @@ export async function update() {
         api.open(currentPath, file.name);
       });
     }
+
+    nameOuterDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (e.ctrlKey) {
+        selectedFiles.add(file.name);
+      } else if (e.shiftKey) {
+        if (selectedFiles.size === 0) {
+          selectedFiles.add(file.name);
+        } else {
+          const start = fileNames.indexOf(selectedFiles.values().next().value!);
+          const end = fileNames.indexOf(file.name);
+          if (start == -1 || end == -1) return;
+          fileNames.slice(Math.min(start, end), Math.max(start, end) + 1).forEach(n => selectedFiles.add(n));
+        }
+      } else {
+        selectedFiles.clear();
+        selectedFiles.add(file.name);
+      }
+      update();
+    });
   }
+
+  flContentsDiv.innerHTML = '';
+  flContentsDiv.appendChild(flagment);
 }
 api.onUpdate(update);
-
-api.onChangeLFFolder(() => {
-  setCurrentPath('/');
-});
