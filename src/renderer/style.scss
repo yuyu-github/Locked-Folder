@@ -39,6 +39,7 @@ body>div {
   font-size: 10pt;
   flex-grow: 1;
   border: 1px solid #ccc;
+  user-select: none;
 
   div {
     padding: 0 1.5px;
@@ -56,4 +57,35 @@ body>div {
 
 #filelist {
   flex-grow: 1;
+  user-select: none;
+}
+
+#filelist-inner {
+  display: table;
+  width: 100%;
+  font-size: 10pt;
+
+  > div {
+    display: table-row;
+    height: 22px;
+    padding: 1px 0;
+    line-height: 20px;
+
+    > div {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 4px;
+      border-right: 1px solid #eee;
+
+      &:first-child {
+        &:hover {
+          background-color: #e5f3ff;
+        }
+      }
+      
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
 }

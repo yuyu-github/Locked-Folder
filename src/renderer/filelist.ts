@@ -1,6 +1,8 @@
 import { currentPath, setCurrentPath } from "./manager.js";
 
 const filelistDiv = document.getElementById('filelist')!;
+const filelistInnerDiv = document.getElementById('filelist-inner')!;
+
 filelistDiv.addEventListener('contextmenu', (e) => {
   if (!api.isOpen()) return;
 
@@ -15,17 +17,31 @@ filelistDiv.addEventListener('contextmenu', (e) => {
 });
 
 export async function update() {
-  filelistDiv.innerHTML = '';
+  filelistInnerDiv.innerHTML = '';
   if (!api.isOpen()) return;
 
   const files = await api.getFiles(currentPath);
   for (let file of files) {
     const div = document.createElement('div');
-    div.textContent = file.name;
-    filelistDiv.appendChild(div);
+    filelistInnerDiv.appendChild(div);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = file.name;
+    nameDiv.classList.add('name');
+    div.appendChild(nameDiv);
+
+    const createdDiv = document.createElement('div');
+    createdDiv.textContent = new Date(file.created).toLocaleString();
+    createdDiv.classList.add('created');
+    div.appendChild(createdDiv);
+
+    const modifiedDiv = document.createElement('div');
+    modifiedDiv.textContent = new Date(file.lastModified).toLocaleString();
+    modifiedDiv.classList.add('modified');
+    div.appendChild(modifiedDiv);
 
     if (file.isDirectory) {
-      div.addEventListener('contextmenu', (e) => {
+      nameDiv.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
         api.showContextMenu(`folder-${file.name}`, [
           ['download', { label: 'ダウンロード' }],
@@ -38,11 +54,11 @@ export async function update() {
         ]);
       });
 
-      div.addEventListener('dblclick', () => {
+      nameDiv.addEventListener('dblclick', () => {
         setCurrentPath(currentPath + `${file.name}/`);
       });
     } else {
-      div.addEventListener('contextmenu', (e) => {
+      nameDiv.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
         api.showContextMenu(`file-${file.name}`, [
           ['open', { label: '開く' }],
@@ -56,7 +72,7 @@ export async function update() {
         ]);
       });
 
-      div.addEventListener('dblclick', () => {
+      nameDiv.addEventListener('dblclick', () => {
         api.open(currentPath, file.name);
       });
     }

@@ -136,7 +136,10 @@ ipcMain.handle('cut', (e, path: string, name: string) => {
 
   const children = getChildren(path);
   for (let i = children.length - 1; i >= 0; i--) {
-    if (children[i].name === name) children.splice(i, 1);
+    if (children[i].name === name) {
+      children.splice(i, 1);
+      break;
+    }
   }
 
   saveFileMap();
@@ -176,7 +179,10 @@ ipcMain.handle('rename', async (e, path: string, name: string) => {
 ipcMain.handle('delete', async (e, path: string, name: string) => {
   const children = getChildren(path);
   for (let i = children.length - 1; i >= 0; i--) {
-    if (children[i].name === name) children.splice(i, 1);
+    if (children[i].name === name) {
+      children.splice(i, 1);
+      break;
+    }
   }
 
   saveFileMap();
