@@ -121,11 +121,13 @@ export async function update() {
       });
     }
 
-    nameOuterDiv.addEventListener('click', (e) => {
+    nameOuterDiv.addEventListener('mousedown', (e) => {
       e.stopPropagation();
-      if (e.ctrlKey) {
+      if (e.button !== 0 && e.button !== 2) return;
+
+      if (e.ctrlKey && e.button === 0) {
         selectedFiles.add(file.name);
-      } else if (e.shiftKey) {
+      } else if (e.shiftKey && e.button === 0) {
         if (selectedFiles.size === 0) {
           selectedFiles.add(file.name);
         } else {
