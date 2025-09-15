@@ -134,7 +134,10 @@ export async function update() {
             const start = fileNames.indexOf(selectedFiles.values().next().value!);
             const end = fileNames.indexOf(file.name);
             if (start == -1 || end == -1) return;
-            fileNames.slice(Math.min(start, end), Math.max(start, end) + 1).forEach(n => selectedFiles.add(n));
+
+            selectedFiles.clear();
+            if (start < end) fileNames.slice(start, end + 1).forEach(n => selectedFiles.add(n));
+            else fileNames.slice(end, start + 1).toReversed().forEach(n => selectedFiles.add(n));
           }
         } else {
           selectedFiles.clear();
