@@ -1,9 +1,16 @@
+$hover-color: #e5f3ff;
+$hover-outline-color: #000;
+
 html,
 body,
 body>div {
   margin: 0;
   width: 100%;
   height: 100%;
+}
+
+body {
+  overflow: hidden;
 }
 
 .v-container {
@@ -26,16 +33,15 @@ body>div {
   background-color: transparent;
 
   &:hover {
-    background-color: #eee;
-    cursor: pointer;
+    background-color: $hover-color;
+    outline: 1px solid $hover-outline-color;
   }
 }
 
 #addressbar {
   height: 20px;
   margin: 4px;
-  padding: 2px;
-  padding-top: 0;
+  padding: 1px 2px;
   font-size: 10pt;
   flex-grow: 1;
   border: 1px solid #ccc;
@@ -43,6 +49,12 @@ body>div {
 
   div {
     padding: 0 1.5px;
+    line-height: 18px;
+  }
+
+  div:not(.sep):hover {
+    background-color: $hover-color;
+    outline: 1px solid $hover-outline-color;
   }
 
   .root-slash {
@@ -55,16 +67,31 @@ body>div {
   }
 }
 
-#filelist {
+#fl-background {
   flex-grow: 1;
+  padding: 2px 4px;
   user-select: none;
+  overflow: auto;
 }
 
-#filelist-inner {
+#filelist {
   display: table;
-  width: 100%;
   font-size: 10pt;
+}
 
+#fl-header {
+  display: table-header-group;
+}
+
+#fl-contents {
+  display: table-row-group;
+
+  > div > div:first-child:hover {
+    background-color: $hover-color;
+  }
+}
+
+#fl-header, #fl-contents {
   > div {
     display: table-row;
     height: 22px;
@@ -76,15 +103,17 @@ body>div {
       vertical-align: middle;
       padding: 0 4px;
       border-right: 1px solid #eee;
+      white-space: pre;
 
-      &:first-child {
-        &:hover {
-          background-color: #e5f3ff;
-        }
-      }
-      
       &:last-child {
         border-right: none;
+      }
+
+      &:nth-child(1) {
+        min-width: 250px;
+      }
+      &:nth-child(2), &:nth-child(3) {
+        min-width: 125px;
       }
     }
   }

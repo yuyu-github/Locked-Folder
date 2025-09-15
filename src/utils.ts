@@ -19,7 +19,7 @@ export function decrypt(key: Buffer, data: Buffer): Buffer {
 }
 
 export function escapeName(name: string) {
-  return name.replace(/[\/\\?%*:|"<>]/g, '_');
+  return name.replace(/[\/\\\n?%*:|"<>]/g, '_');
 }
 
 export function nameResolve(parent: string, name: string) {

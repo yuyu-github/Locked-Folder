@@ -1,9 +1,9 @@
 import { currentPath, setCurrentPath } from "./manager.js";
 
-const filelistDiv = document.getElementById('filelist')!;
-const filelistInnerDiv = document.getElementById('filelist-inner')!;
+const flBackgroundDiv = document.getElementById('fl-background')!;
+const flContentsDiv = document.getElementById('fl-contents')!;
 
-filelistDiv.addEventListener('contextmenu', (e) => {
+flBackgroundDiv.addEventListener('contextmenu', (e) => {
   if (!api.isOpen()) return;
 
   api.showContextMenu('background', [
@@ -17,13 +17,13 @@ filelistDiv.addEventListener('contextmenu', (e) => {
 });
 
 export async function update() {
-  filelistInnerDiv.innerHTML = '';
+  flContentsDiv.innerHTML = '';
   if (!api.isOpen()) return;
 
   const files = await api.getFiles(currentPath);
   for (let file of files) {
     const div = document.createElement('div');
-    filelistInnerDiv.appendChild(div);
+    flContentsDiv.appendChild(div);
 
     const nameDiv = document.createElement('div');
     nameDiv.textContent = file.name;

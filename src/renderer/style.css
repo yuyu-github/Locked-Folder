@@ -6,6 +6,10 @@ body > div {
   height: 100%;
 }
 
+body {
+  overflow: hidden;
+}
+
 .v-container {
   display: flex;
   flex-direction: column;
@@ -26,15 +30,14 @@ body > div {
   background-color: transparent;
 }
 #back:hover, #forward:hover {
-  background-color: #eee;
-  cursor: pointer;
+  background-color: #e5f3ff;
+  outline: 1px solid #000;
 }
 
 #addressbar {
   height: 20px;
   margin: 4px;
-  padding: 2px;
-  padding-top: 0;
+  padding: 1px 2px;
   font-size: 10pt;
   flex-grow: 1;
   border: 1px solid #ccc;
@@ -44,6 +47,11 @@ body > div {
 }
 #addressbar div {
   padding: 0 1.5px;
+  line-height: 18px;
+}
+#addressbar div:not(.sep):hover {
+  background-color: #e5f3ff;
+  outline: 1px solid #000;
 }
 #addressbar .root-slash {
   padding: 0 3px;
@@ -53,33 +61,50 @@ body > div {
   top: 1px;
 }
 
-#filelist {
+#fl-background {
   flex-grow: 1;
+  padding: 2px 4px;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+  overflow: auto;
 }
 
-#filelist-inner {
+#filelist {
   display: table;
-  width: 100%;
   font-size: 10pt;
 }
-#filelist-inner > div {
+
+#fl-header {
+  display: table-header-group;
+}
+
+#fl-contents {
+  display: table-row-group;
+}
+#fl-contents > div > div:first-child:hover {
+  background-color: #e5f3ff;
+}
+
+#fl-header > div, #fl-contents > div {
   display: table-row;
   height: 22px;
   padding: 1px 0;
   line-height: 20px;
 }
-#filelist-inner > div > div {
+#fl-header > div > div, #fl-contents > div > div {
   display: table-cell;
   vertical-align: middle;
   padding: 0 4px;
   border-right: 1px solid #eee;
+  white-space: pre;
 }
-#filelist-inner > div > div:first-child:hover {
-  background-color: #e5f3ff;
-}
-#filelist-inner > div > div:last-child {
+#fl-header > div > div:last-child, #fl-contents > div > div:last-child {
   border-right: none;
+}
+#fl-header > div > div:nth-child(1), #fl-contents > div > div:nth-child(1) {
+  min-width: 250px;
+}
+#fl-header > div > div:nth-child(2), #fl-header > div > div:nth-child(3), #fl-contents > div > div:nth-child(2), #fl-contents > div > div:nth-child(3) {
+  min-width: 125px;
 }/*# sourceMappingURL=style.css.map */
