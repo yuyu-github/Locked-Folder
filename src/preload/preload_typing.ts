@@ -19,6 +19,7 @@ interface IApi {
   paste: (path: string) => Promise<void>;
   rename: (path: string, name: string) => Promise<void>;
   delete: (path: string, name: string) => Promise<void>;
+  getIcon: (ext: `.${string}`|'') => Promise<string>;
 
   onContextMenuClick: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
@@ -31,7 +32,7 @@ interface IApi {
   ) => Electron.IpcRenderer;
 }
 
-interface FileData {
+export interface FileData {
   name: string;
   lastModified: number;
   created: number;

@@ -63,7 +63,7 @@ body {
 
 #fl-background {
   flex-grow: 1;
-  padding: 2px 4px;
+  padding: 1px 4px;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
@@ -71,12 +71,14 @@ body {
 }
 
 #filelist {
+  display: none;
   display: table;
   font-size: 10pt;
 }
 
 #fl-header {
   display: table-header-group;
+  margin-bottom: 2px;
 }
 
 #fl-contents {
@@ -102,9 +104,13 @@ body {
 #fl-header > div > div:last-child, #fl-contents > div > div:last-child {
   border-right: none;
 }
-#fl-header > div > div:nth-child(1), #fl-contents > div > div:nth-child(1) {
+#fl-header > div .name-outer, #fl-contents > div .name-outer {
   min-width: 250px;
 }
-#fl-header > div > div:nth-child(2), #fl-header > div > div:nth-child(3), #fl-contents > div > div:nth-child(2), #fl-contents > div > div:nth-child(3) {
+#fl-header > div .created, #fl-header > div .modified, #fl-contents > div .created, #fl-contents > div .modified {
   min-width: 125px;
+}
+#fl-header > div .icon, #fl-contents > div .icon {
+  height: 18px;
+  margin-right: 4px;
 }/*# sourceMappingURL=style.css.map */

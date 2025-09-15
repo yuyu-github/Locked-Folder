@@ -69,18 +69,20 @@ body {
 
 #fl-background {
   flex-grow: 1;
-  padding: 2px 4px;
+  padding: 1px 4px;
   user-select: none;
   overflow: auto;
 }
 
 #filelist {
+  display: none;
   display: table;
   font-size: 10pt;
 }
 
 #fl-header {
   display: table-header-group;
+  margin-bottom: 2px;
 }
 
 #fl-contents {
@@ -108,13 +110,18 @@ body {
       &:last-child {
         border-right: none;
       }
+    }
 
-      &:nth-child(1) {
-        min-width: 250px;
-      }
-      &:nth-child(2), &:nth-child(3) {
-        min-width: 125px;
-      }
+    .name-outer {
+      min-width: 250px;
+    }
+    .created, .modified {
+      min-width: 125px;
+    }
+
+    .icon {
+      height: 18px;
+      margin-right: 4px;
     }
   }
 }

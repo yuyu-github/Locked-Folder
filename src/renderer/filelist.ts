@@ -1,6 +1,22 @@
+import { FileData } from '../preload/preload_typing.js';
 import { currentPath, setCurrentPath } from "./manager.js";
 
+const iconCache: Record<string, string> = {};
+
+async function getIcon(file: FileData) {
+  if (file.isDirectory) {
+    return 'img/folder.png';
+  } else {
+    const ext = (file.name.match(/(?<!^)\.[^\.]+$/)?.[0] ?? '') as `.${string}`|'';
+    if (ext in iconCache) return iconCache[ext];
+    const icon = await api.getIcon(ext);
+    iconCache[ext] = icon;
+    return icon;
+  }
+}
+
 const flBackgroundDiv = document.getElementById('fl-background')!;
+const filelistDiv = document.getElementById('filelist')!;
 const flContentsDiv = document.getElementById('fl-contents')!;
 
 flBackgroundDiv.addEventListener('contextmenu', (e) => {
@@ -18,17 +34,34 @@ flBackgroundDiv.addEventListener('contextmenu', (e) => {
 
 export async function update() {
   flContentsDiv.innerHTML = '';
-  if (!api.isOpen()) return;
+  
+  if (!api.isOpen()) {
+    filelistDiv.style.display = 'none';
+    return;
+  }
+  filelistDiv.style.display = 'block';
 
   const files = await api.getFiles(currentPath);
   for (let file of files) {
     const div = document.createElement('div');
     flContentsDiv.appendChild(div);
 
+    const nameOuterDiv = document.createElement('div');
+    nameOuterDiv.classList.add('name-outer');
+    const nameOuterFlexDiv = document.createElement('div');
+    nameOuterFlexDiv.classList.add('h-container');
+    nameOuterDiv.appendChild(nameOuterFlexDiv);
+    div.appendChild(nameOuterDiv);
+   
+    const iconImg = document.createElement('img');
+    iconImg.src = await getIcon(file);
+    iconImg.classList.add('icon');
+    nameOuterFlexDiv.appendChild(iconImg);
+    
     const nameDiv = document.createElement('div');
     nameDiv.textContent = file.name;
     nameDiv.classList.add('name');
-    div.appendChild(nameDiv);
+    nameOuterFlexDiv.appendChild(nameDiv);
 
     const createdDiv = document.createElement('div');
     createdDiv.textContent = new Date(file.created).toLocaleString();
@@ -41,7 +74,7 @@ export async function update() {
     div.appendChild(modifiedDiv);
 
     if (file.isDirectory) {
-      nameDiv.addEventListener('contextmenu', (e) => {
+      nameOuterDiv.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
         api.showContextMenu(`folder-${file.name}`, [
           ['download', { label: 'ダウンロード' }],
@@ -54,11 +87,11 @@ export async function update() {
         ]);
       });
 
-      nameDiv.addEventListener('dblclick', () => {
+      nameOuterDiv.addEventListener('dblclick', () => {
         setCurrentPath(currentPath + `${file.name}/`);
       });
     } else {
-      nameDiv.addEventListener('contextmenu', (e) => {
+      nameOuterDiv.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
         api.showContextMenu(`file-${file.name}`, [
           ['open', { label: '開く' }],
@@ -72,7 +105,7 @@ export async function update() {
         ]);
       });
 
-      nameDiv.addEventListener('dblclick', () => {
+      nameOuterDiv.addEventListener('dblclick', () => {
         api.open(currentPath, file.name);
       });
     }

@@ -180,7 +180,7 @@ export function getChildren(path: string, mkfolder = false): FileData[] {
 
 export function deleteTmpFiles(all = false) {
   if (all) {
-    const tmpDir = path.join(os.tmpdir(), 'LockedFolder');
+    const tmpDir = path.join(os.tmpdir(), 'LockedFolder/open');
     if (fs.existsSync(tmpDir)) {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
@@ -197,7 +197,7 @@ export function getTmpFilePath(file: FileData): string {
   const lfFolderHash = crypto.createHash('sha256').update(lfFolderPath!).digest('hex');
   const tmpFilePath = path.join(
     os.tmpdir(),
-    'LockedFolder',
+    'LockedFolder/open',
     lfFolderHash,
     `${path.parse(file.name).name}_${file.dataName}${path.extname(file.name)}`
   );
@@ -223,7 +223,7 @@ export function saveFile(file: FileData, data: Buffer) {
   saveFileMap();
 }
 
-chokidar.watch(path.join(os.tmpdir(), 'LockedFolder')).on('change', (filepath) => {
+chokidar.watch(path.join(os.tmpdir(), 'LockedFolder/open')).on('change', (filepath) => {
   if (filepath in openedFiles && lfFolderPath && cryptoKey) {
     try {
       const data = fs.readFileSync(filepath);

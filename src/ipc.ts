@@ -1,5 +1,6 @@
-import { dialog, ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
+import { app, dialog, ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
 import fs from 'fs';
+import os from 'os';
 import { dirname, join as joinPath } from 'path';
 import {
   copyFile,
@@ -187,4 +188,14 @@ ipcMain.handle('delete', async (e, path: string, name: string) => {
 
   saveFileMap();
   mainWindow!.webContents.send('update');
+});
+
+ipcMain.handle('getIcon', async (e, ext: `.${string}`|'') => {
+  const iconDir = joinPath(os.tmpdir(), 'LockedFolder/icon');
+  if (!fs.existsSync(iconDir)) fs.mkdirSync(iconDir, { recursive: true });
+  const filePath = joinPath(iconDir, `_${ext}`);
+  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '');
+  
+  const icon = await app.getFileIcon(filePath, { size: 'normal' })
+  return icon.toDataURL();
 });
