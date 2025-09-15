@@ -285,7 +285,7 @@ export function copyFile(file: FileData) {
     }
   }
   if (file.children) {
-    newFile.children = file.children.map((child) => copyFile(child));
+    newFile.children = file.children.map(copyFile);
   }
   return newFile;
 }

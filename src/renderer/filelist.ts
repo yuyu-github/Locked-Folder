@@ -35,9 +35,9 @@ flBackgroundDiv.addEventListener('contextmenu', (e) => {
   ]);
 });
 
-flBackgroundDiv.addEventListener('click', () => {
+flBackgroundDiv.addEventListener('mousedown', () => {
   selectedFiles.clear();
-  update();
+  selectedUpdate();
 });
 
 export async function update() {
@@ -123,24 +123,31 @@ export async function update() {
 
     nameOuterDiv.addEventListener('mousedown', (e) => {
       e.stopPropagation();
-      if (e.button !== 0 && e.button !== 2) return;
 
-      if (e.ctrlKey && e.button === 0) {
-        selectedFiles.add(file.name);
-      } else if (e.shiftKey && e.button === 0) {
-        if (selectedFiles.size === 0) {
+      if (e.button == 0) {
+        if (e.ctrlKey) {
           selectedFiles.add(file.name);
+        } else if (e.shiftKey) {
+          if (selectedFiles.size === 0) {
+            selectedFiles.add(file.name);
+          } else {
+            const start = fileNames.indexOf(selectedFiles.values().next().value!);
+            const end = fileNames.indexOf(file.name);
+            if (start == -1 || end == -1) return;
+            fileNames.slice(Math.min(start, end), Math.max(start, end) + 1).forEach(n => selectedFiles.add(n));
+          }
         } else {
-          const start = fileNames.indexOf(selectedFiles.values().next().value!);
-          const end = fileNames.indexOf(file.name);
-          if (start == -1 || end == -1) return;
-          fileNames.slice(Math.min(start, end), Math.max(start, end) + 1).forEach(n => selectedFiles.add(n));
+          selectedFiles.clear();
+          selectedFiles.add(file.name);
         }
-      } else {
-        selectedFiles.clear();
-        selectedFiles.add(file.name);
+      } else if (e.button == 2) {
+        if (!selectedFiles.has(file.name)) {
+          selectedFiles.clear();
+          selectedFiles.add(file.name);
+        }
       }
-      update();
+
+      selectedUpdate();
     });
   }
 
@@ -148,3 +155,14 @@ export async function update() {
   flContentsDiv.appendChild(flagment);
 }
 api.onUpdate(update);
+
+export function selectedUpdate() {
+  for (let div of flContentsDiv.querySelectorAll('.name-outer')) {
+    const name = div.querySelector('.name')!.textContent;
+    if (selectedFiles.has(name)) {
+      div.classList.add('selected');
+    } else {
+      div.classList.remove('selected');
+    }
+  }
+}

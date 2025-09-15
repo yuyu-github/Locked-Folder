@@ -92,7 +92,7 @@ ipcMain.handle('uploadFolder', async (e, path: string) => {
   uploadFiles(result.filePaths, path)
 });
 
-ipcMain.handle('download', async (e, path: string, name: string) => {
+ipcMain.handle('download', async (e, path: string, names: Set<string>) => {
   if (!lfFolderPath || !cryptoKey) return;
 
   const result = await dialog.showOpenDialog(mainWindow!, {
@@ -102,9 +102,8 @@ ipcMain.handle('download', async (e, path: string, name: string) => {
   if (result.canceled || result.filePaths.length === 0) return;
   const target = result.filePaths[0];
 
-  const file = getItem(path, name);
-  if (!file) return;
-  downloadFiles([file], target);
+  const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
+  downloadFiles(files, target);
 });
 
 ipcMain.handle('open', async (e, path: string, name: string) => {
@@ -130,16 +129,14 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
   openedFiles[tmpFilePath] = file;
 });
 
-ipcMain.handle('cut', (e, path: string, name: string) => {
-  const file = getItem(path, name);
-  if (!file) return;
-  setFileClipboard([file]);
+ipcMain.handle('cut', (e, path: string, names: Set<string>) => {
+  const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
+  setFileClipboard(files);
 
   const children = getChildren(path);
   for (let i = children.length - 1; i >= 0; i--) {
-    if (children[i].name === name) {
+    if (names.has(children[i].name)) {
       children.splice(i, 1);
-      break;
     }
   }
 
@@ -147,10 +144,9 @@ ipcMain.handle('cut', (e, path: string, name: string) => {
   mainWindow!.webContents.send('update');
 });
 
-ipcMain.handle('copy', (e, path: string, name: string) => {
-  const file = getItem(path, name);
-  if (!file) return;
-  setFileClipboard([copyFile(file)]);
+ipcMain.handle('copy', (e, path: string, names: Set<string>) => {
+  const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
+  setFileClipboard(files.map(copyFile));
 });
 
 ipcMain.handle('paste', (e, path: string) => {
@@ -177,12 +173,11 @@ ipcMain.handle('rename', async (e, path: string, name: string) => {
   mainWindow!.webContents.send('update');
 });
 
-ipcMain.handle('delete', async (e, path: string, name: string) => {
+ipcMain.handle('delete', async (e, path: string, names: Set<string>) => {
   const children = getChildren(path);
   for (let i = children.length - 1; i >= 0; i--) {
-    if (children[i].name === name) {
+    if (names.has(children[i].name)) {
       children.splice(i, 1);
-      break;
     }
   }
 
@@ -195,7 +190,7 @@ ipcMain.handle('getIcon', async (e, ext: `.${string}`|'') => {
   if (!fs.existsSync(iconDir)) fs.mkdirSync(iconDir, { recursive: true });
   const filePath = joinPath(iconDir, `_${ext}`);
   if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '');
-  
+
   const icon = await app.getFileIcon(filePath, { size: 'normal' })
   return icon.toDataURL();
 });

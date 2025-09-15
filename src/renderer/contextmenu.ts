@@ -1,3 +1,4 @@
+import { selectedFiles } from "./filelist.js";
 import { currentPath } from "./manager.js";
 
 api.onContextMenuClick((e, caller, id) => {
@@ -19,8 +20,7 @@ api.onContextMenuClick((e, caller, id) => {
       break;
     }
     case 'download': {
-      const name = caller.replace(/^(file|folder)-/, '');
-      api.download(currentPath, name);
+      api.download(currentPath, selectedFiles);
       break;
     }
     case 'open': {
@@ -29,13 +29,11 @@ api.onContextMenuClick((e, caller, id) => {
       break;
     }
     case 'cut': {
-      const name = caller.replace(/^(file|folder)-/, '');
-      api.cut(currentPath, name);
+      api.cut(currentPath, selectedFiles);
       break;
     }
     case 'copy': {
-      const name = caller.replace(/^(file|folder)-/, '');
-      api.copy(currentPath, name);
+      api.copy(currentPath, selectedFiles);
       break;
     }
     case 'paste': {
@@ -48,8 +46,7 @@ api.onContextMenuClick((e, caller, id) => {
       break;
     }
     case 'delete': {
-      const name = caller.replace(/^(file|folder)-/, '');
-      api.delete(currentPath, name);
+      api.delete(currentPath, selectedFiles);
       break;
     }
   }
