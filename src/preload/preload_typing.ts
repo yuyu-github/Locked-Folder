@@ -19,7 +19,7 @@ interface IApi {
   paste: (path: string) => Promise<void>;
   rename: (path: string, name: string) => Promise<void>;
   delete: (path: string, names: Set<string>) => Promise<void>;
-  getIcon: (ext: `.${string}`|'') => Promise<string>;
+  getIcon: (ext: string) => Promise<string>;
 
   onContextMenuClick: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void

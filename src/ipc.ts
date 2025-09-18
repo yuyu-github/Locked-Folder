@@ -188,7 +188,7 @@ ipcMain.handle('delete', async (e, path: string, names: Set<string>) => {
   mainWindow!.webContents.send('update');
 });
 
-ipcMain.handle('getIcon', async (e, ext: `.${string}`|'') => {
+ipcMain.handle('getIcon', async (e, ext: string) => {
   const iconDir = joinPath(os.tmpdir(), 'LockedFolder/icon');
   if (!fs.existsSync(iconDir)) fs.mkdirSync(iconDir, { recursive: true });
   const filePath = joinPath(iconDir, `_${ext}`);

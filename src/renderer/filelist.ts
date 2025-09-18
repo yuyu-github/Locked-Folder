@@ -7,7 +7,8 @@ async function getIcon(file: FileData) {
   if (file.isDirectory) {
     return 'img/folder.png';
   } else {
-    const ext = (file.name.match(/(?<!^)\.[^\.]+$/)?.[0] ?? '') as `.${string}`|'';
+    const ext = file.name.match(/(?<!^)\.[^\.]+$/)?.[0];
+    if (!ext) return 'img/file.png';
     if (ext in iconCache) return iconCache[ext];
     const icon = await api.getIcon(ext);
     iconCache[ext] = icon;
