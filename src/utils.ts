@@ -24,10 +24,10 @@ export function escapeName(name: string) {
 
 export function nameResolve(parent: string, name: string) {
   name = escapeName(name);
+  const parsed = path.parse(name);
   const children = getChildren(parent);
   let i = 1;
   while (children.some((i) => i.name === name)) {
-    const parsed = path.parse(name);
     name = `${parsed.name} (${i++})${parsed.ext}`;
   }
   return name;

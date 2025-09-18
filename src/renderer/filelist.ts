@@ -15,7 +15,7 @@ async function getIcon(file: FileData) {
   }
 }
 
-
+export let files: FileData[] = []
 export const selectedFiles: Set<string> = new Set();
 
 const flBackgroundDiv = document.getElementById('fl-background')!;
@@ -25,7 +25,7 @@ const flContentsDiv = document.getElementById('fl-contents')!;
 flBackgroundDiv.addEventListener('contextmenu', (e) => {
   if (!api.isOpen()) return;
 
-  api.showContextMenu('background', [
+  api.showContextMenu('', [
     ['newFile', { label: 'ファイルを作成' }],
     ['newFolder', { label: 'フォルダを作成' }],
     ['uploadFile', { label: 'ファイルをアップロード' }],
@@ -49,7 +49,7 @@ export async function update() {
   }
   flOuterDiv.style.display = 'block';
 
-  const files = await api.getFiles(currentPath);
+  files = await api.getFiles(currentPath);
   const fileNames = files.map(f => f.name);
 
   for (let file of files) {
