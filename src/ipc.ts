@@ -74,6 +74,7 @@ ipcMain.handle('uploadFile', async (e, path: string) => {
   const result = await dialog.showOpenDialog(mainWindow!, {
     properties: ['openFile', 'multiSelections'],
     title: 'ファイルを選択',
+    buttonLabel: 'アップロード',
   });
   if (result.canceled || result.filePaths.length === 0) return;
 
@@ -86,6 +87,7 @@ ipcMain.handle('uploadFolder', async (e, path: string) => {
   const result = await dialog.showOpenDialog(mainWindow!, {
     properties: ['openDirectory', 'multiSelections'],
     title: 'フォルダを選択',
+    buttonLabel: 'アップロード',
   });
   if (result.canceled || result.filePaths.length === 0) return;
 
@@ -98,6 +100,7 @@ ipcMain.handle('download', async (e, path: string, names: Set<string>) => {
   const result = await dialog.showOpenDialog(mainWindow!, {
     properties: ['openDirectory', 'createDirectory'],
     title: '保存先を選択',
+    buttonLabel: 'ダウンロード',
   });
   if (result.canceled || result.filePaths.length === 0) return;
   const target = result.filePaths[0];
