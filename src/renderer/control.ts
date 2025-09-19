@@ -1,4 +1,4 @@
-import { files, selectedFiles, selectedUpdate } from "./filelist.js";
+import { files, flBackgroundDiv, selectedFiles, selectedUpdate } from "./filelist.js";
 import { currentPath } from "./manager.js";
 
 function onContextMenuClick(e, caller, id) {
@@ -94,5 +94,22 @@ document.addEventListener('keydown', (e) => {
   } else if (key === 'delete' && selectedFiles.size > 0) {
     api.delete(currentPath, selectedFiles);
     e.preventDefault();
+  }
+});
+
+flBackgroundDiv.addEventListener('dragover', (e) => {
+  e.preventDefault();
+});
+
+flBackgroundDiv.addEventListener('drop', async (e) => {
+  e.preventDefault();
+
+  if (api.isOpen()) {
+
+  } else {
+    console.log(e.dataTransfer?.files)
+    if (e.dataTransfer?.files.length === 0) return;
+    const path = api.getPathForFile(e.dataTransfer!.files[0]!);
+    api.openLFFolder(path);
   }
 });

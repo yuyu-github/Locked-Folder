@@ -19,7 +19,7 @@ async function getIcon(file: FileData) {
 export let files: FileData[] = []
 export const selectedFiles: Set<string> = new Set();
 
-const flBackgroundDiv = document.getElementById('fl-background')!;
+export const flBackgroundDiv = document.getElementById('fl-background')!;
 const flOuterDiv = document.getElementById('fl-outer')!;
 const flContentsDiv = document.getElementById('fl-contents')!;
 

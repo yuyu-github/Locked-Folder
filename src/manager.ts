@@ -77,15 +77,20 @@ export async function createNewLFFolder() {
   onChangeLFFolder();
 }
 
-export async function openLFFolder() {
+export async function openLFFolderUI() {
+  //LFフォルダを選択
+  const result = dialog.showOpenDialogSync(mainWindow!, {
+    properties: ['openDirectory'],
+    title: 'LFフォルダを選択',
+  });
+  if (!result) return;
+  const path = result[0];
+  await openLFFolder(path);
+}
+
+export async function openLFFolder(path: string) {
   try {
-    //LFフォルダを選択
-    const result = dialog.showOpenDialogSync(mainWindow!, {
-      properties: ['openDirectory'],
-      title: 'LFフォルダを選択',
-    });
-    if (!result) return;
-    const path = result[0];
+    if (!fs.existsSync(`${path}/lfinfo.json`) || !fs.existsSync(`${path}/map.lfi`)) return;
 
     const pass = await showDialog<string>(mainWindow!, 'pass_input', 'パスワードを入力');
     if (!pass) return;

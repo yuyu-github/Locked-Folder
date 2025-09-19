@@ -14,6 +14,7 @@ import {
   getTmpFilePath,
   lfFolderPath,
   openedFiles,
+  openLFFolder,
   saveFileMap,
   setFileClipboard,
   uploadFiles
@@ -21,8 +22,12 @@ import {
 import { decrypt, nameResolve, showDialog } from './utils.js';
 import { mainWindow } from './window.js';
 
-ipcMain.on('isOpen', (event) => {
-  event.returnValue = lfFolderPath !== null;
+ipcMain.on('isOpen', (e) => {
+  e.returnValue = lfFolderPath !== null;
+});
+
+ipcMain.handle('openLFFolder', async (e, path: string) => {
+  await openLFFolder(path);
 });
 
 ipcMain.handle(

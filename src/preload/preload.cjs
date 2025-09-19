@@ -1,7 +1,8 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   isOpen: () => ipcRenderer.sendSync('isOpen'),
+  openLFFolder: (...params) => ipcRenderer.invoke('openLFFolder', ...params),
   showContextMenu: (...params) => ipcRenderer.invoke('showContextMenu', ...params),
   getFiles: (...params) => ipcRenderer.invoke('getFiles', ...params),
   newFile: (...params) => ipcRenderer.invoke('newFile', ...params),
@@ -20,4 +21,6 @@ contextBridge.exposeInMainWorld('api', {
   onContextMenuClick: callback => ipcRenderer.on('contextMenuClick', callback),
   onChangeLFFolder: callback => ipcRenderer.on('changeLFFolder', callback),
   onUpdate: callback => ipcRenderer.on('update', callback),
+
+  getPathForFile: file => webUtils.getPathForFile(file),
 });

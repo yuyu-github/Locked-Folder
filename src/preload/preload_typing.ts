@@ -6,6 +6,7 @@ declare global {
 
 interface IApi {
   isOpen: () => boolean;
+  openLFFolder: (path: string) => Promise<void>;
   showContextMenu: (caller: string, data: [string, MenuItemConstructorOptions][]) => Promise<void>;
   getFiles: (path: string) => Promise<FileData[]>;
   newFile: (path: string) => Promise<void>;
@@ -30,6 +31,8 @@ interface IApi {
   onUpdate: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
   ) => Electron.IpcRenderer;
+
+  getPathForFile: (file: File) => string;
 }
 
 export interface FileData {

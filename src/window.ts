@@ -1,7 +1,7 @@
 import { BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from 'path';
 import { env } from 'process';
-import { changePass, createNewLFFolder, deleteTmpFiles, openLFFolder } from './manager.js';
+import { changePass, createNewLFFolder, deleteTmpFiles, openLFFolderUI } from './manager.js';
 
 export let mainWindow: BrowserWindow | null;
 
@@ -26,7 +26,7 @@ export function createMainWindow() {
         },
         {
           label: '開く',
-          click: openLFFolder,
+          click: openLFFolderUI,
           accelerator: 'CommandOrControl+O',
         },
         { type: 'separator' },
