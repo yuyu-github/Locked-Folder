@@ -73,7 +73,7 @@ ipcMain.handle('newFolder', async (e, path: string) => {
   mainWindow!.webContents.send('update');
 });
 
-ipcMain.handle('uploadFile', async (e, path: string) => {
+ipcMain.handle('uploadFileUI', async (e, path: string) => {
   if (!lfFolderPath || !cryptoKey) return;
 
   const result = await dialog.showOpenDialog(mainWindow!, {
@@ -86,7 +86,7 @@ ipcMain.handle('uploadFile', async (e, path: string) => {
   uploadFiles(result.filePaths, path)
 });
 
-ipcMain.handle('uploadFolder', async (e, path: string) => {
+ipcMain.handle('uploadFolderUI', async (e, path: string) => {
   if (!lfFolderPath || !cryptoKey) return;
 
   const result = await dialog.showOpenDialog(mainWindow!, {
@@ -97,6 +97,10 @@ ipcMain.handle('uploadFolder', async (e, path: string) => {
   if (result.canceled || result.filePaths.length === 0) return;
 
   uploadFiles(result.filePaths, path)
+});
+
+ipcMain.handle('uploadFile', async (e, path: string, files: string[]) => {
+  uploadFiles(files, path)
 });
 
 ipcMain.handle('download', async (e, path: string, names: Set<string>) => {

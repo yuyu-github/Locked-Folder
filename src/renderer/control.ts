@@ -12,11 +12,11 @@ function onContextMenuClick(e, caller, id) {
       break;
     }
     case 'uploadFile': {
-      api.uploadFile(currentPath);
+      api.uploadFileUI(currentPath);
       break;
     }
     case 'uploadFolder': {
-      api.uploadFolder(currentPath);
+      api.uploadFolderUI(currentPath);
       break;
     }
     case 'download': {
@@ -68,10 +68,10 @@ document.addEventListener('keydown', (e) => {
     api.newFile(currentPath);
     e.preventDefault();
   } else if (ctrl && e.shiftKey && key === 'u') {
-    api.uploadFolder(currentPath);
+    api.uploadFolderUI(currentPath);
     e.preventDefault();
   } else if (ctrl && key === 'u') {
-    api.uploadFile(currentPath);
+    api.uploadFileUI(currentPath);
     e.preventDefault();
   } else if (ctrl && key === 'd' && selectedFiles.size > 0) {
     api.download(currentPath, selectedFiles);
@@ -105,9 +105,11 @@ flBackgroundDiv.addEventListener('drop', async (e) => {
   e.preventDefault();
 
   if (api.isOpen()) {
-
+    if (e.dataTransfer?.files.length !== 0) {
+      const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
+      api.uploadFile(currentPath, filepaths)
+    }
   } else {
-    console.log(e.dataTransfer?.files)
     if (e.dataTransfer?.files.length === 0) return;
     const path = api.getPathForFile(e.dataTransfer!.files[0]!);
     api.openLFFolder(path);

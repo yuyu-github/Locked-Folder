@@ -11,8 +11,9 @@ interface IApi {
   getFiles: (path: string) => Promise<FileData[]>;
   newFile: (path: string) => Promise<void>;
   newFolder: (path: string) => Promise<void>;
-  uploadFile: (path: string) => Promise<void>;
-  uploadFolder: (path: string) => Promise<void>;
+  uploadFileUI: (path: string) => Promise<void>;
+  uploadFolderUI: (path: string) => Promise<void>;
+  uploadFile: (path: string, files: string[]) => Promise<void>;
   download: (path: string, names: Set<string>) => Promise<void>;
   open: (path: string, name: string) => Promise<void>;
   cut: (path: string, names: Set<string>) => Promise<void>;
