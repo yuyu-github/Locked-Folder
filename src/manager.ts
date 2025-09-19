@@ -243,7 +243,9 @@ export function uploadFiles(filePaths: string[], target: string, nest = false) {
   const children = getChildren(target, true);
   for (let filePath of filePaths) {
     if (!fs.existsSync(filePath)) continue;
-    if (fs.lstatSync(filePath).isDirectory()) {
+    if (filePath.startsWith(lfFolderPath!)) continue;
+
+    if (fs.lstatSync(filePath).isDirectory()) { 
       const folder = createFolderData(nameResolve(target, path.basename(filePath)));
       children.push(folder);
 
