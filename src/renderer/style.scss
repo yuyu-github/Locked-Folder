@@ -135,6 +135,10 @@ body {
     .icon {
       height: 18px;
       margin-right: 4px;
+
+      &.cut {
+        opacity: 0.5;
+      }
     }
   }
 }

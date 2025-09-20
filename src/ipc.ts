@@ -16,7 +16,6 @@ import {
   openedFiles,
   openLFFolder,
   saveFileMap,
-  setFileClipboard,
   uploadFiles
 } from './manager.js';
 import { decrypt, nameResolve, showDialog } from './utils.js';
@@ -45,11 +44,13 @@ ipcMain.handle(
 );
 
 ipcMain.handle('getFiles', (e, path: string) => {
+  const cutFiles = fileClipboard.type === 'cut' && fileClipboard.source === path ? fileClipboard.files.map(i => i.name) : [];
   return getChildren(path).map((i) => ({
     name: i.name,
     lastModified: i.lastModified,
     created: i.created,
     isDirectory: i.isDirectory,
+    cut: cutFiles.includes(i.name)
   }));
 });
 
@@ -143,14 +144,9 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
 
 ipcMain.handle('cut', (e, path: string, names: Set<string>) => {
   const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
-  setFileClipboard(files);
-
-  const children = getChildren(path);
-  for (let i = children.length - 1; i >= 0; i--) {
-    if (names.has(children[i].name)) {
-      children.splice(i, 1);
-    }
-  }
+  fileClipboard.type = 'cut';
+  fileClipboard.source = path;
+  fileClipboard.files = files;
 
   saveFileMap();
   mainWindow!.webContents.send('update');
@@ -158,15 +154,36 @@ ipcMain.handle('cut', (e, path: string, names: Set<string>) => {
 
 ipcMain.handle('copy', (e, path: string, names: Set<string>) => {
   const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
-  setFileClipboard(files.map(copyFile));
+  fileClipboard.type = 'copy';
+  fileClipboard.source = path;
+  fileClipboard.files = files.map(copyFile);
+
+  saveFileMap();
+  mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('paste', (e, path: string) => {
-  const children = getChildren(path, true);
-  for (let file of fileClipboard) {
-    file.name = nameResolve(path, file.name);
-    children.push(file);
+  if (['copy', 'cut'].includes(fileClipboard.type)) {
+    const targetChildren = getChildren(path, true);
+    for (let file of fileClipboard.files) {
+      file.name = nameResolve(path, file.name);
+      targetChildren.push(file);
+    }
+
+    if (fileClipboard.type === 'cut' && fileClipboard.source) {
+      const sourceChildren = getChildren(fileClipboard.source);
+      const names = new Set(fileClipboard.files.map(i => i.name));
+      for (let i = sourceChildren.length - 1; i >= 0; i--) {
+        if (names.has(sourceChildren[i].name)) {
+          sourceChildren.splice(i, 1);
+        }
+      }
+    }
   }
+
+  fileClipboard.type = 'none';
+  fileClipboard.source = '';
+  fileClipboard.files = [];
 
   saveFileMap();
   mainWindow!.webContents.send('update');

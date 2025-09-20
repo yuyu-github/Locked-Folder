@@ -41,7 +41,12 @@ export let lfFolderPath: string | null = null;
 export let cryptoKey: Buffer | null = null;
 export let fileMap: FileData[] = [];
 export let openedFiles: Record<string, FileData> = {};
-export let fileClipboard: FileData[] = [];
+
+export let fileClipboard: {
+  type: 'cut' | 'copy' | 'none',
+  source: string,
+  files: FileData[]
+} = { type: 'none', source: '', files: [] };
 
 export async function createNewLFFolder() {
   //LFを作成する場所を選択させて、そのパスを取得
@@ -113,7 +118,7 @@ export async function openLFFolder(path: string) {
 export function onChangeLFFolder() {
   deleteTmpFiles();
   openedFiles = {};
-  fileClipboard = [];
+  fileClipboard = { type: 'none', source: '', files: [] };
   mainWindow!.webContents.send('changeLFFolder');
 }
 
@@ -295,8 +300,4 @@ export function copyFile(file: FileData) {
     newFile.children = file.children.map(copyFile);
   }
   return newFile;
-}
-
-export function setFileClipboard(files: FileData[]) {
-  fileClipboard = files;
 }

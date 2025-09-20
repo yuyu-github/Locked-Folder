@@ -63,7 +63,6 @@ export async function update() {
     nameOuterDiv.draggable = true;
     div.appendChild(nameOuterDiv);
 
-
     const nameOuterFlexDiv = document.createElement('div');
     nameOuterFlexDiv.classList.add('h-container');
     nameOuterDiv.appendChild(nameOuterFlexDiv);
@@ -71,6 +70,7 @@ export async function update() {
     const iconImg = document.createElement('img');
     iconImg.src = await getIcon(file);
     iconImg.classList.add('icon');
+    if (file.cut) iconImg.classList.add('cut');
     nameOuterFlexDiv.appendChild(iconImg);
     
     const nameDiv = document.createElement('div');

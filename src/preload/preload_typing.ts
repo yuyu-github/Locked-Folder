@@ -42,4 +42,5 @@ export interface FileData {
   lastModified: number;
   created: number;
   isDirectory: boolean;
+  cut: boolean;
 }
