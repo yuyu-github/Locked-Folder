@@ -155,27 +155,30 @@ ipcMain.handle('copy', (e, path: string, names: Set<string>) => {
   const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
   fileClipboard.type = 'copy';
   fileClipboard.source = path;
-  fileClipboard.files = files.map(copyFile);
+  fileClipboard.files = files;
 
   mainWindow!.webContents.send('update');
 });
 
 ipcMain.handle('paste', (e, path: string) => {
-  if (['copy', 'cut'].includes(fileClipboard.type)
-      && !(fileClipboard.type === 'cut' && fileClipboard.source === path)) {
+  if (fileClipboard.type === 'copy') {
+    const targetChildren = getChildren(path, true);
+    for (let file of fileClipboard.files.map(copyFile)) {
+      file.name = nameResolve(path, file.name);
+      targetChildren.push(file);
+    }
+  } else if (fileClipboard.type === 'cut' && fileClipboard.source !== path) {
     const targetChildren = getChildren(path, true);
     for (let file of fileClipboard.files) {
       file.name = nameResolve(path, file.name);
       targetChildren.push(file);
     }
 
-    if (fileClipboard.type === 'cut' && fileClipboard.source) {
-      const sourceChildren = getChildren(fileClipboard.source);
-      const names = new Set(fileClipboard.files.map(i => i.name));
-      for (let i = sourceChildren.length - 1; i >= 0; i--) {
-        if (names.has(sourceChildren[i].name)) {
-          sourceChildren.splice(i, 1);
-        }
+    const sourceChildren = getChildren(fileClipboard.source);
+    const names = new Set(fileClipboard.files.map(i => i.name));
+    for (let i = sourceChildren.length - 1; i >= 0; i--) {
+      if (names.has(sourceChildren[i].name)) {
+        sourceChildren.splice(i, 1);
       }
     }
   }
