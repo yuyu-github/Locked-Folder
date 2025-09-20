@@ -163,7 +163,8 @@ ipcMain.handle('copy', (e, path: string, names: Set<string>) => {
 });
 
 ipcMain.handle('paste', (e, path: string) => {
-  if (['copy', 'cut'].includes(fileClipboard.type)) {
+  if (['copy', 'cut'].includes(fileClipboard.type)
+      && !(fileClipboard.type === 'cut' && fileClipboard.source === path)) {
     const targetChildren = getChildren(path, true);
     for (let file of fileClipboard.files) {
       file.name = nameResolve(path, file.name);
