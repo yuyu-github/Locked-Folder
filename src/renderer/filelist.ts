@@ -21,6 +21,7 @@ export const selectedFiles: Set<string> = new Set();
 
 export const flBackgroundDiv = document.getElementById('fl-background')!;
 const flOuterDiv = document.getElementById('fl-outer')!;
+const flHeaderDiv = document.querySelector('#fl-header > div')!;
 const flContentsDiv = document.getElementById('fl-contents')!;
 
 flBackgroundDiv.addEventListener('contextmenu', (e) => {
@@ -40,6 +41,56 @@ flBackgroundDiv.addEventListener('mousedown', () => {
   selectedFiles.clear();
   selectedUpdate();
 });
+
+const cols = {
+  'name': '名前',
+  'created': '作成日時',
+  'modified': '更新日時',
+}
+
+const headerFlagment = document.createDocumentFragment();
+for (let [cls, name] of Object.entries(cols)) {
+  const cellDiv = document.createElement('div');
+  cellDiv.classList.add(cls);
+  headerFlagment.appendChild(cellDiv);
+  const div = document.createElement('div');
+  div.classList.add('h-container');
+  cellDiv.appendChild(div);
+
+  const colNameDiv = document.createElement('div');
+  colNameDiv.classList.add('col-name');
+  colNameDiv.textContent = name;
+  div.appendChild(colNameDiv);
+
+  const resizerDiv = document.createElement('div');
+  resizerDiv.classList.add('resizer');
+  div.appendChild(resizerDiv);
+
+  resizerDiv.addEventListener('mousedown', (e) => {
+    const startX = e.pageX;
+    const startWidth = cellDiv.clientWidth;
+    document.body.style.cursor = 'col-resize';
+
+    let frameId: number | null = null;
+    function resize(e: MouseEvent) {
+      if (frameId) return;
+      frameId = requestAnimationFrame(() => {
+        const newWidth = startWidth + (e.pageX - startX);
+        cellDiv.style.minWidth = `${newWidth}px`;
+        frameId = null;
+      });
+    }
+    function stopResize() {
+      document.removeEventListener('mousemove', resize);
+      document.removeEventListener('mouseup', stopResize);
+      document.body.style.cursor = 'unset';
+    }
+
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
+  });
+}
+flHeaderDiv.appendChild(headerFlagment);
 
 export async function update() {
   const flagment = document.createDocumentFragment();

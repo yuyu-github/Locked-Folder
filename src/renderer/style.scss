@@ -89,11 +89,38 @@ body {
 
 #fl-header {
   display: table-header-group;
-  margin-bottom: 2px;
+
+  > div {
+    > div {
+      padding-bottom: 4px;
+
+      .col-name {
+        flex-grow: 1;
+        padding: 0 4px;
+      }
+
+      .resizer {
+        width: 5px;
+        align-self: stretch;
+        cursor: col-resize;
+      }
+    }
+
+    .name {
+      min-width: 250px;
+    }
+    .created, .modified {
+      min-width: 125px;
+    }
+  }
 }
 
 #fl-contents {
   display: table-row-group;
+
+  > div > div {
+    padding: 0 4px;
+  }
 
   .name-outer {
     &:hover {
@@ -116,20 +143,8 @@ body {
     > div {
       display: table-cell;
       vertical-align: middle;
-      padding: 0 4px;
       border-right: 1px solid #eee;
       white-space: pre;
-
-      &:last-child {
-        border-right: none;
-      }
-    }
-
-    .name-outer {
-      min-width: 250px;
-    }
-    .created, .modified {
-      min-width: 125px;
     }
 
     .icon {

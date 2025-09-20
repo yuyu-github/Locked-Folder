@@ -81,11 +81,31 @@ body {
 
 #fl-header {
   display: table-header-group;
-  margin-bottom: 2px;
+}
+#fl-header > div > div {
+  padding-bottom: 4px;
+}
+#fl-header > div > div .col-name {
+  flex-grow: 1;
+  padding: 0 4px;
+}
+#fl-header > div > div .resizer {
+  width: 5px;
+  align-self: stretch;
+  cursor: col-resize;
+}
+#fl-header > div .name {
+  min-width: 250px;
+}
+#fl-header > div .created, #fl-header > div .modified {
+  min-width: 125px;
 }
 
 #fl-contents {
   display: table-row-group;
+}
+#fl-contents > div > div {
+  padding: 0 4px;
 }
 #fl-contents .name-outer:hover {
   background-color: #e5f3ff;
@@ -103,18 +123,8 @@ body {
 #fl-header > div > div, #fl-contents > div > div {
   display: table-cell;
   vertical-align: middle;
-  padding: 0 4px;
   border-right: 1px solid #eee;
   white-space: pre;
-}
-#fl-header > div > div:last-child, #fl-contents > div > div:last-child {
-  border-right: none;
-}
-#fl-header > div .name-outer, #fl-contents > div .name-outer {
-  min-width: 250px;
-}
-#fl-header > div .created, #fl-header > div .modified, #fl-contents > div .created, #fl-contents > div .modified {
-  min-width: 125px;
 }
 #fl-header > div .icon, #fl-contents > div .icon {
   height: 18px;
