@@ -34,9 +34,9 @@ export function nameResolve(parent: string, name: string) {
 }
 
 export function nameResolveFS(fullpath: string) {
+  const parsed = path.parse(fullpath);
   let i = 1;
   while (fs.existsSync(fullpath)) {
-    const parsed = path.parse(fullpath);
     fullpath = path.join(parsed.dir, `${parsed.name} (${i++})${parsed.ext}`);
   }
   return fullpath;

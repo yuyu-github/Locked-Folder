@@ -252,14 +252,20 @@ export function uploadFiles(filePaths: string[], target: string, nest = false) {
 
     if (fs.lstatSync(filePath).isDirectory()) { 
       const folder = createFolderData(nameResolve(target, path.basename(filePath)));
+      const stat = fs.lstatSync(filePath);
+      folder.created = stat.birthtimeMs;
+      folder.lastModified = stat.mtimeMs;
       children.push(folder);
 
       const subFiles = fs.readdirSync(filePath);
       uploadFiles(subFiles.map(f => path.join(filePath, f)), path.posix.join(target, folder.name), true);
     } else {
       const file = createFileData(nameResolve(target, path.basename(filePath)))
-      children.push(file);
       saveFile(file, fs.readFileSync(filePath))
+      const stat = fs.lstatSync(filePath);
+      file.created = stat.birthtimeMs;
+      file.lastModified = stat.mtimeMs;
+      children.push(file);
     }
   }
 
@@ -276,12 +282,14 @@ export function downloadFiles(files: FileData[], target: string) {
     if (file.isDirectory) {
       fs.mkdirSync(targetPath);
       if (file.children) downloadFiles(file.children, targetPath);
+      fs.lutimesSync(targetPath, new Date(file.lastModified), new Date(file.lastModified));
     } else {
       const dataPath = path.join(lfFolderPath!, 'data', file.dataName!);
-      let data;
+      let data: Buffer;
       if (fs.existsSync(dataPath)) data = decrypt(cryptoKey!, fs.readFileSync(dataPath));
       else data = Buffer.from(''); 
       fs.writeFileSync(targetPath, data);
+      fs.lutimesSync(targetPath, new Date(file.lastModified), new Date(file.lastModified));
     }
   }
 }
