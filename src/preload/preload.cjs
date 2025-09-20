@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('api', {
   isOpen: () => ipcRenderer.sendSync('isOpen'),
   openLFFolder: (...params) => ipcRenderer.invoke('openLFFolder', ...params),
   showContextMenu: (...params) => ipcRenderer.invoke('showContextMenu', ...params),
+  setViewSetting: (...params) => ipcRenderer.invoke('setViewSetting', ...params),
+  getViewSettings: (...params) => ipcRenderer.invoke('getViewSettings', ...params),
   getFiles: (...params) => ipcRenderer.invoke('getFiles', ...params),
   newFile: (...params) => ipcRenderer.invoke('newFile', ...params),
   newFolder: (...params) => ipcRenderer.invoke('newFolder', ...params),

@@ -66,6 +66,9 @@ for (let [cls, name] of Object.entries(cols)) {
       sortType = cls;
       sortReverse = false;
     }
+
+    api.setViewSetting('sortType', sortType);
+    api.setViewSetting('sortReverse', sortReverse);
     updateSortIcon();
     update();
   });
@@ -95,6 +98,7 @@ for (let [cls, name] of Object.entries(cols)) {
       });
     }
     function stopResize() {
+      api.setViewSetting(`colWidth.${cls}`, cellDiv.style.minWidth);
       document.removeEventListener('mousemove', resize);
       document.removeEventListener('mouseup', stopResize);
       document.body.style.cursor = 'unset';
@@ -105,6 +109,20 @@ for (let [cls, name] of Object.entries(cols)) {
   });
 }
 flHeaderDiv.appendChild(headerFlagment);
+
+export async function applyViewSettings() {
+  const viewSettings = await api.getViewSettings();
+  if (viewSettings.sortType) sortType = viewSettings.sortType;
+  if (viewSettings.sortReverse) sortReverse = viewSettings.sortReverse;
+  updateSortIcon();
+
+  for (let col in cols) {
+    if (viewSettings.colWidth?.[col]) {
+      const colDiv = flHeaderDiv.querySelector<HTMLElement>(`.${col}`);
+      if (colDiv) colDiv.style.minWidth = viewSettings.colWidth[col];
+    }
+  }
+}
 
 export async function updateSortIcon() {
   flHeaderDiv.querySelectorAll('.sort-icon').forEach(i => i.remove());

@@ -8,6 +8,8 @@ interface IApi {
   isOpen: () => boolean;
   openLFFolder: (path: string) => Promise<void>;
   showContextMenu: (caller: string, data: [string, MenuItemConstructorOptions][]) => Promise<void>;
+  setViewSetting: (key: string, value: any) => Promise<void>;
+  getViewSettings: () => Promise<Record<string, any>>;
   getFiles: (path: string) => Promise<FileData[]>;
   newFile: (path: string) => Promise<void>;
   newFolder: (path: string) => Promise<void>;

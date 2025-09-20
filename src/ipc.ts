@@ -43,6 +43,34 @@ ipcMain.handle(
   }
 );
 
+ipcMain.handle('setViewSetting', async (e, key: string, value: any) => {
+  if (!lfFolderPath) return;
+  const settingsPath = joinPath(lfFolderPath, 'viewsettings.json');
+  let settings: Record<string, any> = {};
+  if (fs.existsSync(settingsPath)) {
+    settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+  }
+
+  let current = settings;
+  for (let i of key.split('.').slice(0, -1)) {
+    current[i] ??= {};
+    current = current[i]
+  }
+  current[key.split('.').at(-1)!] = value;
+  
+  fs.writeFileSync(settingsPath, JSON.stringify(settings));
+});
+
+ipcMain.handle('getViewSettings', async (e) => {
+  if (!lfFolderPath) return {};
+  const settingsPath = joinPath(lfFolderPath, 'viewsettings.json');
+  let settings: Record<string, any> = {};
+  if (fs.existsSync(settingsPath)) {
+    settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+  }
+  return settings;
+});
+
 ipcMain.handle('getFiles', (e, path: string) => {
   const cutFiles = fileClipboard.type === 'cut' && fileClipboard.source === path ? fileClipboard.files.map(i => i.name) : [];
   return getChildren(path).map((i) => ({

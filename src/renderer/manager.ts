@@ -1,5 +1,5 @@
 import { updateAddressbar } from './addressbar.js';
-import { selectedFiles, update } from './filelist.js';
+import { applyViewSettings, selectedFiles, update } from './filelist.js';
 
 export let currentPath = '/';
 
@@ -36,4 +36,5 @@ api.onChangeLFFolder(() => {
   setCurrentPath('/');
   backStack = [];
   forwardStack = [];
+  applyViewSettings();
 });
