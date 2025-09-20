@@ -83,16 +83,29 @@ body {
   display: table-header-group;
 }
 #fl-header > div > div {
-  padding-bottom: 4px;
+  position: relative;
+  padding-bottom: 3px;
 }
-#fl-header > div > div .col-name {
+#fl-header > div > div > .h-container {
+  padding: 1px 0;
+}
+#fl-header > div > div > .h-container:hover {
+  background-color: #e5f3ff;
+}
+#fl-header > div > div > .h-container .col-name {
   flex-grow: 1;
   padding: 0 4px;
 }
-#fl-header > div > div .resizer {
+#fl-header > div > div > .h-container .resizer {
   width: 5px;
   align-self: stretch;
   cursor: col-resize;
+}
+#fl-header > div > div > svg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
 #fl-header > div .name {
   min-width: 250px;

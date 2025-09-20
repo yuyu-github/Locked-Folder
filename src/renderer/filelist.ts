@@ -18,6 +18,8 @@ async function getIcon(file: FileData) {
 
 export let files: FileData[] = []
 export const selectedFiles: Set<string> = new Set();
+export let sortType = 'name';
+export let sortReverse = false;
 
 export const flBackgroundDiv = document.getElementById('fl-background')!;
 const flOuterDiv = document.getElementById('fl-outer')!;
@@ -56,6 +58,17 @@ for (let [cls, name] of Object.entries(cols)) {
   const div = document.createElement('div');
   div.classList.add('h-container');
   cellDiv.appendChild(div);
+  
+  div.addEventListener('click', () => {
+    if (sortType === cls) {
+      sortReverse = !sortReverse;
+    } else {
+      sortType = cls;
+      sortReverse = false;
+    }
+    updateSortIcon();
+    update();
+  });
 
   const colNameDiv = document.createElement('div');
   colNameDiv.classList.add('col-name');
@@ -66,6 +79,7 @@ for (let [cls, name] of Object.entries(cols)) {
   resizerDiv.classList.add('resizer');
   div.appendChild(resizerDiv);
 
+  resizerDiv.addEventListener('click', e => e.stopPropagation())
   resizerDiv.addEventListener('mousedown', (e) => {
     const startX = e.pageX;
     const startWidth = cellDiv.clientWidth;
@@ -92,6 +106,18 @@ for (let [cls, name] of Object.entries(cols)) {
 }
 flHeaderDiv.appendChild(headerFlagment);
 
+export async function updateSortIcon() {
+  flHeaderDiv.querySelectorAll('.sort-icon').forEach(i => i.remove());
+  const svgStr = `
+  <svg width="8" height="4" viewBox="0 0 14 7" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="${sortReverse ? '0,7 7,0 14,7' : '0,0 7,7 14,0'}" fill="none" stroke="black" stroke-width="1"/>
+  </svg>
+  `;
+  const svg = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
+  svg.classList.add('sort-icon');
+  flHeaderDiv.querySelector(`.${sortType}`)?.appendChild(svg);
+}
+
 export async function update() {
   const flagment = document.createDocumentFragment();
 
@@ -102,6 +128,16 @@ export async function update() {
   flOuterDiv.style.display = 'block';
 
   files = await api.getFiles(currentPath);
+  files.sort((a, b) => {
+    switch (sortType) {
+      case 'created': return a.created - b.created;
+      case 'modified': return a.lastModified - b.lastModified;
+      case 'name':
+      default:
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+    }
+  })
+  if (sortReverse) files.reverse();
   const fileNames = files.map(f => f.name);
 
   for (let file of files) {

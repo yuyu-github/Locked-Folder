@@ -90,19 +90,35 @@ body {
 #fl-header {
   display: table-header-group;
 
-  > div {
-    > div {
-      padding-bottom: 4px;
+  > div { // row
+    > div { // cell
+      position: relative;
+      padding-bottom: 3px;
 
-      .col-name {
-        flex-grow: 1;
-        padding: 0 4px;
+      > .h-container {
+        padding: 1px 0;
+
+        &:hover {
+          background-color: $hover-color;
+        }
+
+        .col-name {
+          flex-grow: 1;
+          padding: 0 4px;
+        }
+
+        .resizer {
+          width: 5px;
+          align-self: stretch;
+          cursor: col-resize;
+        }
       }
 
-      .resizer {
-        width: 5px;
-        align-self: stretch;
-        cursor: col-resize;
+      > svg {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, 0);
       }
     }
 
