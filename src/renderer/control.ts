@@ -85,6 +85,9 @@ document.addEventListener('keydown', (e) => {
   } else if (ctrl && key === 'v') {
     api.paste(currentPath);
     e.preventDefault();
+  } else if (key == 'escape') {
+    api.cancelCut();
+    e.preventDefault();
   } else if (key == 'enter' && selectedFiles.size > 0) {
     api.open(currentPath, Array.from(selectedFiles).at(-1)!);
     e.preventDefault();

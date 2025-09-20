@@ -148,7 +148,6 @@ ipcMain.handle('cut', (e, path: string, names: Set<string>) => {
   fileClipboard.source = path;
   fileClipboard.files = files;
 
-  saveFileMap();
   mainWindow!.webContents.send('update');
 });
 
@@ -158,7 +157,6 @@ ipcMain.handle('copy', (e, path: string, names: Set<string>) => {
   fileClipboard.source = path;
   fileClipboard.files = files.map(copyFile);
 
-  saveFileMap();
   mainWindow!.webContents.send('update');
 });
 
@@ -187,6 +185,16 @@ ipcMain.handle('paste', (e, path: string) => {
   fileClipboard.files = [];
 
   saveFileMap();
+  mainWindow!.webContents.send('update');
+});
+
+ipcMain.handle('cancelCut', (e) => {
+  if (fileClipboard.type === 'cut') {
+    fileClipboard.type = 'none';
+    fileClipboard.source = '';
+    fileClipboard.files = [];
+  }
+
   mainWindow!.webContents.send('update');
 });
 

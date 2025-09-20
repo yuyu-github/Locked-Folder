@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
   cut: (...params) => ipcRenderer.invoke('cut', ...params),
   copy: (...params) => ipcRenderer.invoke('copy', ...params),
   paste: (...params) => ipcRenderer.invoke('paste', ...params),
+  cancelCut: (...params) => ipcRenderer.invoke('cancelCut', ...params),
   move: (...params) => ipcRenderer.invoke('move', ...params),
   rename: (...params) => ipcRenderer.invoke('rename', ...params),
   delete: (...params) => ipcRenderer.invoke('delete', ...params),
