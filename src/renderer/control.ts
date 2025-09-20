@@ -98,19 +98,19 @@ document.addEventListener('keydown', (e) => {
 });
 
 flBackgroundDiv.addEventListener('dragover', (e) => {
-  e.preventDefault();
+  if (e.dataTransfer?.types.includes('Files')) {
+    e.preventDefault();
+  }
 });
 
 flBackgroundDiv.addEventListener('drop', async (e) => {
   e.preventDefault();
-
+  
+  if (e.dataTransfer?.files.length === 0) return;
   if (api.isOpen()) {
-    if (e.dataTransfer?.files.length !== 0) {
-      const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
-      api.uploadFile(currentPath, filepaths)
-    }
+    const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
+    api.uploadFile(currentPath, filepaths)
   } else {
-    if (e.dataTransfer?.files.length === 0) return;
     const path = api.getPathForFile(e.dataTransfer!.files[0]!);
     api.openLFFolder(path);
   }

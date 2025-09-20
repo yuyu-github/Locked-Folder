@@ -98,7 +98,7 @@ body {
       background-color: $hover-color;
     }
 
-    &.selected {
+    &.selected, &.drop-target {
       background-color: $select-color;
       outline: 1px solid 
     }

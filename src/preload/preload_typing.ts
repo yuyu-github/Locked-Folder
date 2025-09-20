@@ -19,6 +19,7 @@ interface IApi {
   cut: (path: string, names: Set<string>) => Promise<void>;
   copy: (path: string, names: Set<string>) => Promise<void>;
   paste: (path: string) => Promise<void>;
+  move: (src: string, names: Set<string>, target: string) => Promise<void>;
   rename: (path: string, name: string) => Promise<void>;
   delete: (path: string, names: Set<string>) => Promise<void>;
   getIcon: (ext: string) => Promise<string>;

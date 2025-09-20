@@ -172,6 +172,25 @@ ipcMain.handle('paste', (e, path: string) => {
   mainWindow!.webContents.send('update');
 });
 
+ipcMain.handle('move', (e, src: string, names: Set<string>, target: string) => {
+  for (let name of names) {
+    const file = getItem(src, name);
+    if (!file) return;
+    file.name = nameResolve(target, name);
+    getChildren(target, true).push(file);
+  }
+
+  const children = getChildren(src);
+  for (let i = children.length - 1; i >= 0; i--) {
+    if (names.has(children[i].name)) {
+      children.splice(i, 1);
+    }
+  }
+
+  saveFileMap();
+  mainWindow!.webContents.send('update');
+});
+
 ipcMain.handle('rename', async (e, path: string, name: string) => {
   const newName = await showDialog<string>(mainWindow!, 'input', '新しい名前を入力', {
     default: name,

@@ -90,7 +90,7 @@ body {
 #fl-contents .name-outer:hover {
   background-color: #e5f3ff;
 }
-#fl-contents .name-outer.selected {
+#fl-contents .name-outer.selected, #fl-contents .name-outer.drop-target {
   background-color: #cce8ff;
   outline: 1px solid;
 }
