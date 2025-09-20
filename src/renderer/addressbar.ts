@@ -1,3 +1,4 @@
+import { selectedFiles } from "./filelist.js";
 import { currentPath, setCurrentPath } from "./manager.js";
 
 const addressbarDiv = document.getElementById('addressbar')!;
@@ -29,8 +30,38 @@ export function updateAddressbar() {
     addressbarDiv.appendChild(nameDiv);
 
     const path = stack;
+
     nameDiv.addEventListener('click', () => {
       setCurrentPath(path);
-    })
+    });
+
+    nameDiv.addEventListener('dragover', (e) => {
+      if (e.dataTransfer!.types.includes('Files')) {
+        e.dataTransfer!.dropEffect = 'copy';
+      } else {
+        if (currentPath == path) return;
+        e.dataTransfer!.dropEffect = 'move';
+      }
+      e.preventDefault();
+      nameDiv.classList.add('drop-target');
+    });
+
+    nameDiv.addEventListener('dragleave', (e) => {
+      nameDiv.classList.remove('drop-target');
+    });
+
+    nameDiv.addEventListener('drop', (e) => {
+      if (e.dataTransfer?.files.length !== 0) {
+        const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
+        api.uploadFile(path, filepaths)
+      } else {
+        if (currentPath == path) return;
+        api.move(currentPath, selectedFiles, path);
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      nameDiv.classList.remove('drop-target');
+    });
   }
 }

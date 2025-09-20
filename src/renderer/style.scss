@@ -54,9 +54,11 @@ body {
     line-height: 18px;
   }
 
-  div:not(.sep):hover {
-    background-color: $hover-color;
-    outline: 1px solid $hover-outline-color;
+  div:not(.sep) {
+    &:hover, &.drop-target {
+      background-color: $hover-color;
+      outline: 1px solid $hover-outline-color;
+    }
   }
 
   .root-slash {

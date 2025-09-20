@@ -122,16 +122,17 @@ export async function update() {
       });
 
       nameOuterDiv.addEventListener('drop', (e) => {
-        e.preventDefault();
-
         if (e.dataTransfer?.files.length !== 0) {
-          e.stopPropagation();
           const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
           api.uploadFile(currentPath + `${file.name}/`, filepaths)
         } else {
           if (selectedFiles.has(file.name)) return;
           api.move(currentPath, selectedFiles, currentPath + `${file.name}/`);
         }
+
+        e.preventDefault();
+        e.stopPropagation();
+        nameOuterDiv.classList.remove('drop-target');
       });
     } else {
       nameOuterDiv.addEventListener('contextmenu', (e) => {

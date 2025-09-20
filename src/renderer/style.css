@@ -49,7 +49,7 @@ body {
   padding: 0 1.5px;
   line-height: 18px;
 }
-#addressbar div:not(.sep):hover {
+#addressbar div:not(.sep):hover, #addressbar div:not(.sep).drop-target {
   background-color: #e5f3ff;
   outline: 1px solid #000;
 }
