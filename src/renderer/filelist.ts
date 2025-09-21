@@ -160,6 +160,7 @@ export async function update() {
 
   for (let file of files) {
     const div = document.createElement('div');
+    div.dataset.name = file.name;
     flagment.appendChild(div);
 
     const nameOuterDiv = document.createElement('div');
@@ -312,4 +313,49 @@ export function selectedUpdate() {
       div.classList.remove('selected');
     }
   }
+}
+
+export function startRename(type: 'rename', name: string) {
+  const div = flContentsDiv.querySelector(`div[data-name="${CSS.escape(name)}"]`);
+  if (!div) return;
+  const nameDiv = div.querySelector('.name')!;
+  nameDiv.textContent = '';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = name;
+  input.spellcheck = false;
+  nameDiv.appendChild(input);
+
+  input.focus();
+  const selectEnd = name.lastIndexOf('.');
+  if (selectEnd > 0) input.setSelectionRange(0, selectEnd);
+  else input.select();
+
+  function endRename(cancel = false) {
+    document.removeEventListener('mousedown', onMouseDown, { capture: true });
+    document.removeEventListener('keydown', onKeyDown, { capture: true });
+
+    const newName = input.value.trim();
+    input.remove();
+
+    if (cancel || newName == name || newName == '') update();
+    else {
+      if (type == 'rename') {
+        api.rename(currentPath, name, newName);
+      }
+    }
+  }
+
+  function onMouseDown(e: MouseEvent) {
+    if (e.target !== input) endRename();
+    e.stopImmediatePropagation();
+  }
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter') endRename();
+    else if (e.key === 'Escape') endRename(true);
+    e.stopImmediatePropagation();
+  }
+  document.addEventListener('mousedown', onMouseDown, { capture: true });
+  document.addEventListener('keydown', onKeyDown, { capture: true });
 }

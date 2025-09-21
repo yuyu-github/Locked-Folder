@@ -23,7 +23,7 @@ interface IApi {
   paste: (path: string) => Promise<void>;
   cancelCut: () => Promise<void>;
   move: (src: string, names: Set<string>, target: string) => Promise<void>;
-  rename: (path: string, name: string) => Promise<void>;
+  rename: (path: string, oldName: string, newName: string) => Promise<void>;
   delete: (path: string, names: Set<string>) => Promise<void>;
   getIcon: (ext: string) => Promise<string>;
 

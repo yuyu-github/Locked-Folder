@@ -125,7 +125,27 @@ body {
 }
 #fl-contents .name-outer.selected, #fl-contents .name-outer.drop-target {
   background-color: #cce8ff;
-  outline: 1px solid;
+  outline: 1px solid #000;
+}
+#fl-contents .name {
+  width: 100%;
+}
+#fl-contents .name > input {
+  min-width: 100%;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  font-family: inherit;
+  border: none;
+  outline: 1px solid black;
+  padding: 0;
+}
+#fl-contents .icon {
+  height: 18px;
+  margin-right: 4px;
+}
+#fl-contents .icon.cut {
+  opacity: 0.5;
 }
 
 #fl-header > div, #fl-contents > div {
@@ -138,11 +158,4 @@ body {
   vertical-align: middle;
   border-right: 1px solid #eee;
   white-space: pre;
-}
-#fl-header > div .icon, #fl-contents > div .icon {
-  height: 18px;
-  margin-right: 4px;
-}
-#fl-header > div .icon.cut, #fl-contents > div .icon.cut {
-  opacity: 0.5;
 }/*# sourceMappingURL=style.css.map */

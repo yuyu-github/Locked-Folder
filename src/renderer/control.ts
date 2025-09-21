@@ -1,4 +1,4 @@
-import { files, flBackgroundDiv, selectedFiles, selectedUpdate } from "./filelist.js";
+import { files, flBackgroundDiv, selectedFiles, selectedUpdate, startRename } from "./filelist.js";
 import { currentPath } from "./manager.js";
 
 function onContextMenuClick(e, caller, id) {
@@ -42,7 +42,7 @@ function onContextMenuClick(e, caller, id) {
     }
     case 'rename': {
       const name = caller.replace(/^(file|folder)-/, '');
-      api.rename(currentPath, name);
+      startRename('rename', name);
       break;
     }
     case 'delete': {
@@ -92,7 +92,7 @@ document.addEventListener('keydown', (e) => {
     api.open(currentPath, Array.from(selectedFiles).at(-1)!);
     e.preventDefault();
   } else if (key === 'f2' && selectedFiles.size > 0) {
-    api.rename(currentPath, Array.from(selectedFiles).at(-1)!);
+    startRename('rename', Array.from(selectedFiles).at(-1)!);
     e.preventDefault();
   } else if (key === 'delete' && selectedFiles.size > 0) {
     api.delete(currentPath, selectedFiles);

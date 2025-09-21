@@ -57,7 +57,7 @@ ipcMain.handle('setViewSetting', async (e, key: string, value: any) => {
     current = current[i]
   }
   current[key.split('.').at(-1)!] = value;
-  
+
   fs.writeFileSync(settingsPath, JSON.stringify(settings));
 });
 
@@ -248,13 +248,8 @@ ipcMain.handle('move', (e, src: string, names: Set<string>, target: string) => {
   mainWindow!.webContents.send('update');
 });
 
-ipcMain.handle('rename', async (e, path: string, name: string) => {
-  const newName = await showDialog<string>(mainWindow!, 'input', '新しい名前を入力', {
-    default: name,
-  });
-  if (!newName) return;
-
-  const file = getItem(path, name);
+ipcMain.handle('rename', async (e, path: string, oldName: string, newName: string) => {
+  const file = getItem(path, oldName);
   if (file) file.name = nameResolve(path, newName);
 
   saveFileMap();

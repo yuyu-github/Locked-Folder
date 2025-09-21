@@ -145,7 +145,31 @@ body {
 
     &.selected, &.drop-target {
       background-color: $select-color;
-      outline: 1px solid 
+      outline: 1px solid $select-outline-color;
+    }
+  }
+
+  .name {
+    width: 100%;
+
+    > input {
+      min-width: 100%;
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+      font-family: inherit;
+      border: none;
+      outline: 1px solid black;
+      padding: 0;
+    }
+  }
+
+  .icon {
+    height: 18px;
+    margin-right: 4px;
+
+    &.cut {
+      opacity: 0.5;
     }
   }
 }
@@ -161,15 +185,6 @@ body {
       vertical-align: middle;
       border-right: 1px solid #eee;
       white-space: pre;
-    }
-
-    .icon {
-      height: 18px;
-      margin-right: 4px;
-
-      &.cut {
-        opacity: 0.5;
-      }
     }
   }
 }
