@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('api', {
   onContextMenuClick: callback => ipcRenderer.on('contextMenuClick', callback),
   onChangeLFFolder: callback => ipcRenderer.on('changeLFFolder', callback),
   onUpdate: callback => ipcRenderer.on('update', callback),
+  onStartRename: callback => ipcRenderer.on('startRename', callback),
 
   getPathForFile: file => webUtils.getPathForFile(file),
 });

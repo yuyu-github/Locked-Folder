@@ -36,6 +36,9 @@ interface IApi {
   onUpdate: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
   ) => Electron.IpcRenderer;
+  onStartRename: (
+    callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
+  ) => Electron.IpcRenderer;
 
   getPathForFile: (file: File) => string;
 }

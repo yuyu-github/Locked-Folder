@@ -18,7 +18,7 @@ import {
   saveFileMap,
   uploadFiles
 } from './manager.js';
-import { decrypt, nameResolve, showDialog } from './utils.js';
+import { decrypt, nameResolve } from './utils.js';
 import { mainWindow } from './window.js';
 
 ipcMain.on('isOpen', (e) => {
@@ -83,23 +83,19 @@ ipcMain.handle('getFiles', (e, path: string) => {
 });
 
 ipcMain.handle('newFile', async (e, path: string) => {
-  const name = await showDialog<string>(mainWindow!, 'input', 'ファイル名を入力');
-  if (!name) return;
-
-  getChildren(path, true).push(createFileData(nameResolve(path, name)));
+  const name = nameResolve(path, '新しいファイル');
+  getChildren(path, true).push(createFileData(name));
 
   saveFileMap();
-  mainWindow!.webContents.send('update');
+  mainWindow!.webContents.send('startRename', name);
 });
 
 ipcMain.handle('newFolder', async (e, path: string) => {
-  const name = await showDialog<string>(mainWindow!, 'input', 'フォルダ名を入力');
-  if (!name) return;
-
-  getChildren(path, true).push(createFolderData(nameResolve(path, name)));
+  const name = nameResolve(path, '新しいフォルダ');
+  getChildren(path, true).push(createFolderData(name));
 
   saveFileMap();
-  mainWindow!.webContents.send('update');
+  mainWindow!.webContents.send('startRename', name);
 });
 
 ipcMain.handle('uploadFileUI', async (e, path: string) => {

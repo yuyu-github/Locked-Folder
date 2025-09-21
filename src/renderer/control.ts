@@ -42,7 +42,7 @@ function onContextMenuClick(e, caller, id) {
     }
     case 'rename': {
       const name = caller.replace(/^(file|folder)-/, '');
-      startRename('rename', name);
+      startRename(name);
       break;
     }
     case 'delete': {
@@ -92,7 +92,7 @@ document.addEventListener('keydown', (e) => {
     api.open(currentPath, Array.from(selectedFiles).at(-1)!);
     e.preventDefault();
   } else if (key === 'f2' && selectedFiles.size > 0) {
-    startRename('rename', Array.from(selectedFiles).at(-1)!);
+    startRename(Array.from(selectedFiles).at(-1)!);
     e.preventDefault();
   } else if (key === 'delete' && selectedFiles.size > 0) {
     api.delete(currentPath, selectedFiles);

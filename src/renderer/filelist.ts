@@ -315,7 +315,7 @@ export function selectedUpdate() {
   }
 }
 
-export function startRename(type: 'rename', name: string) {
+export function startRename(name: string = '') {
   const div = flContentsDiv.querySelector(`div[data-name="${CSS.escape(name)}"]`);
   if (!div) return;
   const nameDiv = div.querySelector('.name')!;
@@ -340,11 +340,7 @@ export function startRename(type: 'rename', name: string) {
     input.remove();
 
     if (cancel || newName == name || newName == '') update();
-    else {
-      if (type == 'rename') {
-        api.rename(currentPath, name, newName);
-      }
-    }
+    else api.rename(currentPath, name, newName);
   }
 
   function onMouseDown(e: MouseEvent) {
@@ -359,3 +355,7 @@ export function startRename(type: 'rename', name: string) {
   document.addEventListener('mousedown', onMouseDown, { capture: true });
   document.addEventListener('keydown', onKeyDown, { capture: true });
 }
+api.onStartRename(async (e, name: string) => {
+  await update();
+  startRename(name);
+});
