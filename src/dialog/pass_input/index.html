@@ -1,9 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding: 8px;
+    }
+
+    input {
+      height: 20px;
+      font-size: 10pt;
+      border: 1px solid #aaaaaa;
+      border-radius: 2px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    button {
+      background-color: #fdfdfd;
+      border: 1px solid #dadada;
+      font-family: inherit;
+      font-size: 10pt;
+      height: 26px;
+      width: 90px;
+      border-radius: 4px;
+      user-select: none;
+      transition: background-color 0.4s, border-color 0.4s;
+    }
+
+    button:hover {
+      background-color: #e0eef9;
+      border-color: #0078d4;
+    }
+  </style>
+</head>
 <body>
   <input id="pass" type="password" autofocus />
-  <button id="ok">OK</button>
+  <div class="buttons">
+    <button id="cancel" class="btn-win10">キャンセル</button>
+    <button id="ok" class="btn-win10">OK</button>
+  </div>
+
   <script>
     const { ipcRenderer } = require('electron');
     
+    document.getElementById('cancel').addEventListener('click', () => {
+      ipcRenderer.send('return', null);
+    });
+
     document.getElementById('ok').addEventListener('click', () => {
       const value = document.getElementById('pass').value;
       if (value.trim() === '') return;
@@ -11,7 +72,9 @@
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('ok').click();
+      if (e.key === 'Escape') document.getElementById('cancel').click();
+      else if (e.key === 'Enter') document.getElementById('ok').click();
     });
   </script>
 </body>
+</html>

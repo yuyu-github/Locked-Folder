@@ -54,10 +54,10 @@ export async function showDialog<T>(
   const win = new BrowserWindow({
     width: options.width,
     height: options.height,
+    resizable: options.resizable,
     parent,
     title,
     modal: true,
-    resizable: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

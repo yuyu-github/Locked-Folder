@@ -1,4 +1,5 @@
 {
   "width": 300,
-  "height": 120
+  "height": 120,
+  "resizable": false
 }
