@@ -227,6 +227,7 @@ export async function update() {
     iconImg.src = await getIcon(file);
     iconImg.classList.add('icon');
     if (file.cut) iconImg.classList.add('cut');
+    iconImg.draggable = false;
     nameOuterFlexDiv.appendChild(iconImg);
     
     const nameDiv = document.createElement('div');
@@ -391,6 +392,8 @@ export function selectedUpdate() {
 export function startRename(name: string = '') {
   const div = flContentsDiv.querySelector(`div[data-name="${CSS.escape(name)}"]`);
   if (!div) return;
+  const nameOuterDiv = div.querySelector<HTMLElement>('.name-outer')!;
+  nameOuterDiv.draggable = false;
   const nameDiv = div.querySelector('.name')!;
   nameDiv.textContent = '';
 
@@ -418,7 +421,6 @@ export function startRename(name: string = '') {
 
   function onMouseDown(e: MouseEvent) {
     if (e.target !== input) endRename();
-    e.stopImmediatePropagation();
   }
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter') endRename();
@@ -427,6 +429,9 @@ export function startRename(name: string = '') {
   }
   document.addEventListener('mousedown', onMouseDown, { capture: true });
   document.addEventListener('keydown', onKeyDown, { capture: true });
+
+  input.addEventListener('dblclick', e => e.stopPropagation());
+  input.addEventListener('contextmenu', e => e.stopPropagation());
 }
 api.onStartRename(async (e, name: string) => {
   await update();
