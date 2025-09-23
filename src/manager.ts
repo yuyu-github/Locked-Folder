@@ -15,6 +15,11 @@ export interface FileData {
   created: number;
   dataName?: string;
   children?: FileData[];
+  recycleBinData?: {
+    orgPath: string;
+    orgName: string;
+    deleted: number;
+  }
 }
 
 export function createFileData(name: string): FileData {
@@ -290,6 +295,17 @@ export function downloadFiles(files: FileData[], target: string) {
       else data = Buffer.from(''); 
       fs.writeFileSync(targetPath, data);
       fs.lutimesSync(targetPath, new Date(file.lastModified), new Date(file.lastModified));
+    }
+  }
+}
+
+export function deleteFiles(files: FileData[]) {
+  for (let file of files) {
+    if (file.isDirectory && file.children) {
+      deleteFiles(file.children);
+    } else if (file.dataName) {
+      const dataPath = path.join(lfFolderPath!, 'data', file.dataName);
+      fs.rmSync(dataPath, { force: true });
     }
   }
 }

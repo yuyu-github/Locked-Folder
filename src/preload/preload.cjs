@@ -21,12 +21,15 @@ contextBridge.exposeInMainWorld('api', {
   move: (...params) => ipcRenderer.invoke('move', ...params),
   rename: (...params) => ipcRenderer.invoke('rename', ...params),
   delete: (...params) => ipcRenderer.invoke('delete', ...params),
+  moveToRecycleBin: (...params) => ipcRenderer.invoke('moveToRecycleBin', ...params),
+  restore: (...params) => ipcRenderer.invoke('restore', ...params),
   getIcon: (...params) => ipcRenderer.invoke('getIcon', ...params),
 
   onContextMenuClick: callback => ipcRenderer.on('contextMenuClick', callback),
   onChangeLFFolder: callback => ipcRenderer.on('changeLFFolder', callback),
   onUpdate: callback => ipcRenderer.on('update', callback),
   onStartRename: callback => ipcRenderer.on('startRename', callback),
+  onOpenRecycleBin: callback => ipcRenderer.on('openRecycleBin', callback),
 
   getPathForFile: file => webUtils.getPathForFile(file),
 });

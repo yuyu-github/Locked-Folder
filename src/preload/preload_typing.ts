@@ -25,6 +25,8 @@ interface IApi {
   move: (src: string, names: Set<string>, target: string) => Promise<void>;
   rename: (path: string, oldName: string, newName: string) => Promise<void>;
   delete: (path: string, names: Set<string>) => Promise<void>;
+  moveToRecycleBin: (path: string, names: Set<string>, recycleBinPath: string) => Promise<void>;
+  restore: (names: Set<string>, recycleBinPath: string) => Promise<void>;
   getIcon: (ext: string) => Promise<string>;
 
   onContextMenuClick: (
@@ -39,6 +41,9 @@ interface IApi {
   onStartRename: (
     callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
   ) => Electron.IpcRenderer;
+  onOpenRecycleBin: (
+    callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void
+  ) => Electron.IpcRenderer;
 
   getPathForFile: (file: File) => string;
 }
@@ -49,4 +54,9 @@ export interface FileData {
   created: number;
   isDirectory: boolean;
   cut: boolean;
+  recycleBinData?: {
+    orgPath: string;
+    orgName: string;
+    deleted: number;
+  }
 }

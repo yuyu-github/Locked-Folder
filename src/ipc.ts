@@ -7,6 +7,7 @@ import {
   createFileData,
   createFolderData,
   cryptoKey,
+  deleteFiles,
   downloadFiles,
   fileClipboard,
   getChildren,
@@ -78,7 +79,8 @@ ipcMain.handle('getFiles', (e, path: string) => {
     lastModified: i.lastModified,
     created: i.created,
     isDirectory: i.isDirectory,
-    cut: cutFiles.includes(i.name)
+    cut: cutFiles.includes(i.name),
+    recycleBinData: i.recycleBinData
   }));
 });
 
@@ -226,18 +228,19 @@ ipcMain.handle('cancelCut', (e) => {
 });
 
 ipcMain.handle('move', (e, src: string, names: Set<string>, target: string) => {
-  for (let name of names) {
-    const file = getItem(src, name);
-    if (!file) return;
-    file.name = nameResolve(target, name);
-    getChildren(target, true).push(file);
-  }
-
-  const children = getChildren(src);
-  for (let i = children.length - 1; i >= 0; i--) {
-    if (names.has(children[i].name)) {
-      children.splice(i, 1);
+  const files = Array.from(names).map(i => getItem(src, i)).filter(i => i !== null);
+  
+  const srcChildren = getChildren(src);
+  for (let i = srcChildren.length - 1; i >= 0; i--) {
+    if (names.has(srcChildren[i].name)) {
+      srcChildren.splice(i, 1);
     }
+  }
+  
+  const targetChildren = getChildren(target, true);
+  for (let file of files) {
+    file.name = nameResolve(target, file.name);
+    targetChildren.push(file);
   }
 
   saveFileMap();
@@ -253,11 +256,74 @@ ipcMain.handle('rename', async (e, path: string, oldName: string, newName: strin
 });
 
 ipcMain.handle('delete', async (e, path: string, names: Set<string>) => {
+  const result = await dialog.showMessageBox(mainWindow!, {
+    type: 'warning',
+    buttons: ['キャンセル', '削除'],
+    defaultId: 1,
+    cancelId: 0,
+    title: '確認',
+    message: '本当に削除しますか？',
+    noLink: true,
+  })
+  if (result.response === 0) return;
+
+  
   const children = getChildren(path);
+  deleteFiles(children);
   for (let i = children.length - 1; i >= 0; i--) {
     if (names.has(children[i].name)) {
       children.splice(i, 1);
     }
+  }
+
+  saveFileMap();
+  mainWindow!.webContents.send('update');
+});
+
+ipcMain.handle('moveToRecycleBin', async (e, path: string, names: Set<string>, recycleBinPath: string) => {
+  const files = Array.from(names).map(i => getItem(path, i)).filter(i => i !== null);
+  
+  const srcChildren = getChildren(path);
+  for (let i = srcChildren.length - 1; i >= 0; i--) {
+    if (names.has(srcChildren[i].name)) {
+      srcChildren.splice(i, 1);
+    }
+  }
+  
+  const recycleBin = getChildren(recycleBinPath, true);
+  for (let file of files) {
+    file.recycleBinData = {
+      orgPath: path,
+      orgName: file.name,
+      deleted: Date.now()
+    };
+    const id = [...Array(6)].map(() => Math.floor(Math.random()*16).toString(16).toUpperCase()).join('');
+    const ext = file.isDirectory ? '' : file.name.match(/(?<!^)\.[^\.]+$/)?.[0] ?? '';
+    file.name = nameResolve(recycleBinPath, id + ext);
+    recycleBin.push(file);
+  }
+
+  saveFileMap();
+  mainWindow!.webContents.send('update');
+});
+
+ipcMain.handle('restore', async (e, names: Set<string>, recycleBinPath: string) => {
+  const files = Array.from(names).map(i => getItem(recycleBinPath, i)).filter(i => i !== null);
+  
+  const recycleBin = getChildren(recycleBinPath);
+  for (let i = recycleBin.length - 1; i >= 0; i--) {
+    if (names.has(recycleBin[i].name)) {
+      recycleBin.splice(i, 1);
+    }
+  }
+  
+  for (let file of files) {
+    if (!file.recycleBinData) continue;
+    const {orgPath, orgName} = file.recycleBinData;
+    const targetChildren = getChildren(orgPath, true);
+    file.name = nameResolve(orgPath, orgName);
+    delete file.recycleBinData;
+    targetChildren.push(file);
   }
 
   saveFileMap();

@@ -1,4 +1,4 @@
-import { selectedFiles } from "./filelist.js";
+import { RECYCLE_BIN_PATH, selectedFiles } from "./filelist.js";
 import { currentPath, setCurrentPath } from "./manager.js";
 
 const addressbarDiv = document.getElementById('addressbar')!;
@@ -20,16 +20,18 @@ export function updateAddressbar() {
       stack += parts[i] + '/';
     }
 
+    const path = stack;
+
     const nameDiv = document.createElement('div');
     if (i === 0) {
       nameDiv.className = 'root-slash';
       nameDiv.textContent = '/';
+    } else if (path === RECYCLE_BIN_PATH) {
+      nameDiv.textContent = 'ごみ箱';
     } else {
       nameDiv.textContent = parts[i];
     }
     addressbarDiv.appendChild(nameDiv);
-
-    const path = stack;
 
     nameDiv.addEventListener('click', () => {
       setCurrentPath(path);

@@ -36,6 +36,15 @@ export function createMainWindow() {
         }
       ],
     },
+    {
+      label: 'ファイル',
+      submenu: [
+        {
+          label: 'ごみ箱を開く',
+          click: () => mainWindow?.webContents.send('openRecycleBin'),
+        }
+      ],
+    }
   ];
 
   if (env.TYPE == 'debug') {

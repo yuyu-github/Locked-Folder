@@ -1,5 +1,5 @@
 import { updateAddressbar } from './addressbar.js';
-import { applyViewSettings, selectedFiles, update } from './filelist.js';
+import { applyViewSettings, RECYCLE_BIN_PATH, selectedFiles, update } from './filelist.js';
 
 export let currentPath = '/';
 
@@ -7,6 +7,9 @@ export let backStack: string[] = [];
 export let forwardStack: string[] = [];
 
 export function setCurrentPath(path: string, stack = true) {
+  if (!api.isOpen()) return;
+
+  if (path.startsWith(RECYCLE_BIN_PATH)) path = RECYCLE_BIN_PATH;
   if (!path.startsWith('/')) path = `/${path}`;
   if (!path.endsWith('/')) path += '/';
 

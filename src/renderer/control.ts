@@ -1,4 +1,4 @@
-import { files, flBackgroundDiv, selectedFiles, selectedUpdate, startRename } from "./filelist.js";
+import { deleteFiles, files, flBackgroundDiv, RECYCLE_BIN_PATH, selectedFiles, selectedUpdate, startRename } from "./filelist.js";
 import { currentPath } from "./manager.js";
 
 function onContextMenuClick(e, caller, id) {
@@ -46,7 +46,11 @@ function onContextMenuClick(e, caller, id) {
       break;
     }
     case 'delete': {
-      api.delete(currentPath, selectedFiles);
+      deleteFiles(currentPath, selectedFiles);
+      break;
+    }
+    case 'restore': {
+      api.restore(selectedFiles, RECYCLE_BIN_PATH);
       break;
     }
   }
@@ -95,7 +99,7 @@ document.addEventListener('keydown', (e) => {
     startRename(Array.from(selectedFiles).at(-1)!);
     e.preventDefault();
   } else if (key === 'delete' && selectedFiles.size > 0) {
-    api.delete(currentPath, selectedFiles);
+    deleteFiles(currentPath, selectedFiles);
     e.preventDefault();
   }
 });

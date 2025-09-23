@@ -16,6 +16,8 @@ async function getIcon(file: FileData) {
   }
 }
 
+export const RECYCLE_BIN_PATH = '/$RECYCLE.BIN/';
+
 export let files: FileData[] = []
 export const selectedFiles: Set<string> = new Set();
 export let sortType = 'name';
@@ -28,6 +30,7 @@ const flContentsDiv = document.getElementById('fl-contents')!;
 
 flBackgroundDiv.addEventListener('contextmenu', (e) => {
   if (!api.isOpen()) return;
+  if (currentPath === RECYCLE_BIN_PATH) return;
 
   api.showContextMenu('', [
     ['newFile', { label: 'ファイルを作成' }],
@@ -145,6 +148,8 @@ export async function update() {
   }
   flOuterDiv.style.display = 'block';
 
+  const inRecycleBin = (currentPath === RECYCLE_BIN_PATH);
+
   files = await api.getFiles(currentPath);
   files.sort((a, b) => {
     switch (sortType) {
@@ -159,7 +164,10 @@ export async function update() {
   const fileNames = files.map(f => f.name);
 
   for (let file of files) {
+    if (`${currentPath}${file.name}/` === RECYCLE_BIN_PATH) continue;
+
     const div = document.createElement('div');
+    div.classList.add('file');
     div.dataset.name = file.name;
     flagment.appendChild(div);
 
@@ -180,7 +188,7 @@ export async function update() {
     nameOuterFlexDiv.appendChild(iconImg);
     
     const nameDiv = document.createElement('div');
-    nameDiv.textContent = file.name;
+    nameDiv.textContent = inRecycleBin ? file.recycleBinData!.orgName : file.name;
     nameDiv.classList.add('name');
     nameOuterFlexDiv.appendChild(nameDiv);
 
@@ -194,70 +202,80 @@ export async function update() {
     modifiedDiv.classList.add('modified');
     div.appendChild(modifiedDiv);
 
-    if (file.isDirectory) {
+    if (inRecycleBin) {
       nameOuterDiv.addEventListener('contextmenu', (e) => {
         e.stopPropagation();
-        api.showContextMenu(`folder-${file.name}`, [
-          ['download', { label: 'ダウンロード' }],
-          ['', { type: 'separator' }],
-          ['cut', { label: '切り取り' }],
-          ['copy', { label: 'コピー' }],
-          ['', { type: 'separator' }],
-          ['rename', { label: '名前を変更' }],
-          ['delete', { label: '削除' }],
+        api.showContextMenu(`${file.isDirectory ? 'folder' : 'file'}-${file.name}`, [
+          ['restore', { label: '元に戻す' }],
+          ['delete', { label: '完全に削除' }],
         ]);
-      });
-
-      nameOuterDiv.addEventListener('dblclick', () => {
-        setCurrentPath(currentPath + `${file.name}/`);
-      });
-
-      nameOuterDiv.addEventListener('dragover', (e) => {
-        if (e.dataTransfer!.types.includes('Files')) {
-          e.dataTransfer!.dropEffect = 'copy';
-        } else {
-          if (selectedFiles.has(file.name)) return;
-          e.dataTransfer!.dropEffect = 'move';
-        }
-        e.preventDefault();
-        nameOuterDiv.classList.add('drop-target');
-      });
-
-      nameOuterDiv.addEventListener('dragleave', (e) => {
-        nameOuterDiv.classList.remove('drop-target');
-      });
-
-      nameOuterDiv.addEventListener('drop', (e) => {
-        if (e.dataTransfer?.files.length !== 0) {
-          const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
-          api.uploadFile(currentPath + `${file.name}/`, filepaths)
-        } else {
-          if (selectedFiles.has(file.name)) return;
-          api.move(currentPath, selectedFiles, currentPath + `${file.name}/`);
-        }
-
-        e.preventDefault();
-        e.stopPropagation();
-        nameOuterDiv.classList.remove('drop-target');
       });
     } else {
-      nameOuterDiv.addEventListener('contextmenu', (e) => {
-        e.stopPropagation();
-        api.showContextMenu(`file-${file.name}`, [
-          ['open', { label: '開く' }],
-          ['download', { label: 'ダウンロード' }],
-          ['', { type: 'separator' }],
-          ['cut', { label: '切り取り' }],
-          ['copy', { label: 'コピー' }],
-          ['', { type: 'separator' }],
-          ['rename', { label: '名前を変更' }],
-          ['delete', { label: '削除' }],
-        ]);
-      });
+      if (file.isDirectory) {
+        nameOuterDiv.addEventListener('contextmenu', (e) => {
+          e.stopPropagation();
+          api.showContextMenu(`folder-${file.name}`, [
+            ['download', { label: 'ダウンロード' }],
+            ['', { type: 'separator' }],
+            ['cut', { label: '切り取り' }],
+            ['copy', { label: 'コピー' }],
+            ['', { type: 'separator' }],
+            ['rename', { label: '名前を変更' }],
+            ['delete', { label: '削除' }],
+          ]);
+        });
 
-      nameOuterDiv.addEventListener('dblclick', () => {
-        api.open(currentPath, file.name);
-      });
+        nameOuterDiv.addEventListener('dblclick', () => {
+          setCurrentPath(currentPath + `${file.name}/`);
+        });
+
+        nameOuterDiv.addEventListener('dragover', (e) => {
+          if (e.dataTransfer!.types.includes('Files')) {
+            e.dataTransfer!.dropEffect = 'copy';
+          } else {
+            if (selectedFiles.has(file.name)) return;
+            e.dataTransfer!.dropEffect = 'move';
+          }
+          e.preventDefault();
+          nameOuterDiv.classList.add('drop-target');
+        });
+
+        nameOuterDiv.addEventListener('dragleave', (e) => {
+          nameOuterDiv.classList.remove('drop-target');
+        });
+
+        nameOuterDiv.addEventListener('drop', (e) => {
+          if (e.dataTransfer?.files.length !== 0) {
+            const filepaths = Array.from(e.dataTransfer!.files).map(i => api.getPathForFile(i));
+            api.uploadFile(currentPath + `${file.name}/`, filepaths)
+          } else {
+            if (selectedFiles.has(file.name)) return;
+            api.move(currentPath, selectedFiles, currentPath + `${file.name}/`);
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+          nameOuterDiv.classList.remove('drop-target');
+        });
+      } else {
+        nameOuterDiv.addEventListener('contextmenu', (e) => {
+          e.stopPropagation();
+          api.showContextMenu(`file-${file.name}`, [
+            ['open', { label: '開く' }],
+            ['download', { label: 'ダウンロード' }],
+            ['', { type: 'separator' }],
+            ['cut', { label: '切り取り' }],
+            ['copy', { label: 'コピー' }],
+            ['', { type: 'separator' }],
+            ['rename', { label: '名前を変更' }],
+            ['delete', { label: currentPath === RECYCLE_BIN_PATH ? '完全に削除' : '削除' }],
+          ]);
+        });
+
+        nameOuterDiv.addEventListener('dblclick', () => {
+          api.open(currentPath, file.name);
+        });
+      }
     }
 
     nameOuterDiv.addEventListener('mousedown', (e) => {
@@ -306,7 +324,7 @@ api.onUpdate(update);
 
 export function selectedUpdate() {
   for (let div of flContentsDiv.querySelectorAll('.name-outer')) {
-    const name = div.querySelector('.name')!.textContent;
+    const name = div.closest<HTMLElement>('.file')!.dataset.name!;
     if (selectedFiles.has(name)) {
       div.classList.add('selected');
     } else {
@@ -359,3 +377,13 @@ api.onStartRename(async (e, name: string) => {
   await update();
   startRename(name);
 });
+
+export function deleteFiles(path: string, names: Set<string>) {
+  if (path === RECYCLE_BIN_PATH) {
+    api.delete(path, names);
+  } else {
+    api.moveToRecycleBin(path, names, RECYCLE_BIN_PATH);
+  }
+}
+
+api.onOpenRecycleBin(() => setCurrentPath(RECYCLE_BIN_PATH));
