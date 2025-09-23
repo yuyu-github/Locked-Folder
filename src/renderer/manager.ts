@@ -1,5 +1,4 @@
-import { updateAddressbar } from './addressbar.js';
-import { applyViewSettings, RECYCLE_BIN_PATH, selectedFiles, update } from './filelist.js';
+import { RECYCLE_BIN_PATH, selectedFiles, updateAll } from './filelist.js';
 
 export let currentPath = '/';
 
@@ -18,9 +17,9 @@ export function setCurrentPath(path: string, stack = true) {
     backStack.push(currentPath);
     forwardStack = [];
   }
+
   currentPath = path;
-  update();
-  updateAddressbar();
+  updateAll();
 }
 
 document.getElementById('back')!.addEventListener('click', () => {
@@ -39,5 +38,4 @@ api.onChangeLFFolder(() => {
   setCurrentPath('/');
   backStack = [];
   forwardStack = [];
-  applyViewSettings();
 });

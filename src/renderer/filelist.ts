@@ -1,4 +1,5 @@
 import { FileData } from '../preload/preload_typing.js';
+import { updateAddressbar } from './addressbar.js';
 import { currentPath, setCurrentPath } from "./manager.js";
 
 const iconCache: Record<string, string> = {};
@@ -18,6 +19,7 @@ async function getIcon(file: FileData) {
 
 export const RECYCLE_BIN_PATH = '/$RECYCLE.BIN/';
 
+export let headerCols: [string, string][] = [];
 export let files: FileData[] = []
 export const selectedFiles: Set<string> = new Set();
 export let sortType = 'name';
@@ -47,81 +49,119 @@ flBackgroundDiv.addEventListener('mousedown', () => {
   selectedUpdate();
 });
 
-const cols = {
-  'name': '名前',
-  'created': '作成日時',
-  'modified': '更新日時',
+export async function updateAll() {
+  await updateHeader();
+  await update();
+  updateAddressbar();
 }
 
-const headerFlagment = document.createDocumentFragment();
-for (let [cls, name] of Object.entries(cols)) {
-  const cellDiv = document.createElement('div');
-  cellDiv.classList.add(cls);
-  headerFlagment.appendChild(cellDiv);
-  const div = document.createElement('div');
-  div.classList.add('h-container');
-  cellDiv.appendChild(div);
-  
-  div.addEventListener('click', () => {
-    if (sortType === cls) {
-      sortReverse = !sortReverse;
-    } else {
-      sortType = cls;
-      sortReverse = false;
-    }
+export async function updateHeader() {
+  if (currentPath === RECYCLE_BIN_PATH) {
+    headerCols = [
+      ['name', '名前'],
+      ['orgPath', '元の場所'],
+      ['deleted', '削除日時'],
+    ]
+  } else {
+    headerCols = [
+      ['name', '名前'],
+      ['created', '作成日時'],
+      ['modified', '更新日時'],
+    ]
+  }
 
-    api.setViewSetting('sortType', sortType);
-    api.setViewSetting('sortReverse', sortReverse);
+  const headerFlagment = document.createDocumentFragment();
+  for (let [cls, name] of headerCols) {
+    const cellDiv = document.createElement('div');
+    cellDiv.classList.add(cls);
+    headerFlagment.appendChild(cellDiv);
+    const div = document.createElement('div');
+    div.classList.add('h-container');
+    cellDiv.appendChild(div);
+    
+    div.addEventListener('click', () => {
+      if (sortType === cls) {
+        sortReverse = !sortReverse;
+      } else {
+        sortType = cls;
+        sortReverse = false;
+      }
+
+      if (currentPath === RECYCLE_BIN_PATH) {
+        api.setViewSetting('recycleBin.sortType', sortType);
+        api.setViewSetting('recycleBin.sortReverse', sortReverse);
+      } else {
+        api.setViewSetting('sortType', sortType);
+        api.setViewSetting('sortReverse', sortReverse);
+      }
+
+      updateSortIcon();
+      update();
+    });
+
+    const colNameDiv = document.createElement('div');
+    colNameDiv.classList.add('col-name');
+    colNameDiv.textContent = name;
+    div.appendChild(colNameDiv);
+
+    const resizerDiv = document.createElement('div');
+    resizerDiv.classList.add('resizer');
+    div.appendChild(resizerDiv);
+
+    resizerDiv.addEventListener('click', e => e.stopPropagation())
+    resizerDiv.addEventListener('mousedown', (e) => {
+      const startX = e.pageX;
+      const startWidth = cellDiv.clientWidth;
+      document.body.style.cursor = 'col-resize';
+
+      let frameId: number | null = null;
+      function resize(e: MouseEvent) {
+        if (frameId) return;
+        frameId = requestAnimationFrame(() => {
+          const newWidth = startWidth + (e.pageX - startX);
+          cellDiv.style.minWidth = `${newWidth}px`;
+          frameId = null;
+        });
+      }
+      function stopResize() {
+        api.setViewSetting(`colWidth.${cls}`, cellDiv.style.minWidth);
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('mouseup', stopResize);
+        document.body.style.cursor = 'unset';
+      }
+
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('mouseup', stopResize);
+    });
+  }
+
+  await applyViewSettings(headerFlagment);
+
+  flHeaderDiv.innerHTML = '';
+  flHeaderDiv.appendChild(headerFlagment);
+
+  if (headerCols.findIndex(i => i[0] === sortType) === -1) {
+    sortType = 'name';
+    sortReverse = false;
     updateSortIcon();
-    update();
-  });
-
-  const colNameDiv = document.createElement('div');
-  colNameDiv.classList.add('col-name');
-  colNameDiv.textContent = name;
-  div.appendChild(colNameDiv);
-
-  const resizerDiv = document.createElement('div');
-  resizerDiv.classList.add('resizer');
-  div.appendChild(resizerDiv);
-
-  resizerDiv.addEventListener('click', e => e.stopPropagation())
-  resizerDiv.addEventListener('mousedown', (e) => {
-    const startX = e.pageX;
-    const startWidth = cellDiv.clientWidth;
-    document.body.style.cursor = 'col-resize';
-
-    let frameId: number | null = null;
-    function resize(e: MouseEvent) {
-      if (frameId) return;
-      frameId = requestAnimationFrame(() => {
-        const newWidth = startWidth + (e.pageX - startX);
-        cellDiv.style.minWidth = `${newWidth}px`;
-        frameId = null;
-      });
-    }
-    function stopResize() {
-      api.setViewSetting(`colWidth.${cls}`, cellDiv.style.minWidth);
-      document.removeEventListener('mousemove', resize);
-      document.removeEventListener('mouseup', stopResize);
-      document.body.style.cursor = 'unset';
-    }
-
-    document.addEventListener('mousemove', resize);
-    document.addEventListener('mouseup', stopResize);
-  });
+  }
 }
-flHeaderDiv.appendChild(headerFlagment);
 
-export async function applyViewSettings() {
+export async function applyViewSettings(headerElem: DocumentFragment|Element = flHeaderDiv) {
   const viewSettings = await api.getViewSettings();
-  if (viewSettings.sortType) sortType = viewSettings.sortType;
-  if (viewSettings.sortReverse) sortReverse = viewSettings.sortReverse;
+  if (currentPath === RECYCLE_BIN_PATH) {
+    if (viewSettings.recycleBin?.sortType) sortType = viewSettings.recycleBin.sortType;
+    if (viewSettings.recycleBin?.sortReverse) sortReverse = viewSettings.recycleBin.sortReverse;
+  } else {
+    if (viewSettings.sortType) sortType = viewSettings.sortType;
+    if (viewSettings.sortReverse) sortReverse = viewSettings.sortReverse;
+  }
+
   updateSortIcon();
 
-  for (let col in cols) {
+  for (let [col, _] of headerCols) {
     if (viewSettings.colWidth?.[col]) {
-      const colDiv = flHeaderDiv.querySelector<HTMLElement>(`.${col}`);
+      const colDiv = headerElem.querySelector<HTMLElement>(`.${col}`);
       if (colDiv) colDiv.style.minWidth = viewSettings.colWidth[col];
     }
   }
@@ -155,6 +195,8 @@ export async function update() {
     switch (sortType) {
       case 'created': return a.created - b.created;
       case 'modified': return a.lastModified - b.lastModified;
+      case 'orgPath': return a.recycleBinData!.orgPath.localeCompare(b.recycleBinData!.orgPath, undefined, { numeric: true, sensitivity: 'base' });
+      case 'deleted': return a.recycleBinData!.deleted - b.recycleBinData!.deleted;
       case 'name':
       default:
         return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
@@ -192,15 +234,27 @@ export async function update() {
     nameDiv.classList.add('name');
     nameOuterFlexDiv.appendChild(nameDiv);
 
-    const createdDiv = document.createElement('div');
-    createdDiv.textContent = new Date(file.created).toLocaleString();
-    createdDiv.classList.add('created');
-    div.appendChild(createdDiv);
+    for (let [col, _] of headerCols.slice(1)) {
+      const colDiv = document.createElement('div');
+      colDiv.classList.add(col);
 
-    const modifiedDiv = document.createElement('div');
-    modifiedDiv.textContent = new Date(file.lastModified).toLocaleString();
-    modifiedDiv.classList.add('modified');
-    div.appendChild(modifiedDiv);
+      switch (col) {
+        case 'created':
+          colDiv.textContent = new Date(file.created).toLocaleString();
+          break;
+        case 'modified':
+          colDiv.textContent = new Date(file.lastModified).toLocaleString();
+          break;
+        case 'orgPath':
+          colDiv.textContent = file.recycleBinData!.orgPath;
+          break;
+        case 'deleted':
+          colDiv.textContent = new Date(file.recycleBinData!.deleted).toLocaleString();
+          break;
+      }
+
+      div.appendChild(colDiv);
+    }
 
     if (inRecycleBin) {
       nameOuterDiv.addEventListener('contextmenu', (e) => {

@@ -122,10 +122,10 @@ body {
       }
     }
 
-    .name {
+    .name, .orgPath {
       min-width: 250px;
     }
-    .created, .modified {
+    .created, .modified, .deleted {
       min-width: 125px;
     }
   }

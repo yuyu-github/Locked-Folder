@@ -107,10 +107,10 @@ body {
   left: 50%;
   transform: translate(-50%, 0);
 }
-#fl-header > div .name {
+#fl-header > div .name, #fl-header > div .orgPath {
   min-width: 250px;
 }
-#fl-header > div .created, #fl-header > div .modified {
+#fl-header > div .created, #fl-header > div .modified, #fl-header > div .deleted {
   min-width: 125px;
 }
 
