@@ -238,18 +238,19 @@ export async function update() {
       const colDiv = document.createElement('div');
       colDiv.classList.add(col);
 
+      const dateFormatter = new Intl.DateTimeFormat(undefined, {dateStyle: 'medium', timeStyle: 'short'});
       switch (col) {
         case 'created':
-          colDiv.textContent = new Date(file.created).toLocaleString();
+          colDiv.textContent = dateFormatter.format(new Date(file.created));
           break;
         case 'modified':
-          colDiv.textContent = new Date(file.lastModified).toLocaleString();
+          colDiv.textContent = dateFormatter.format(new Date(file.lastModified));
           break;
         case 'orgPath':
           colDiv.textContent = file.recycleBinData!.orgPath;
           break;
         case 'deleted':
-          colDiv.textContent = new Date(file.recycleBinData!.deleted).toLocaleString();
+          colDiv.textContent = dateFormatter.format(new Date(file.recycleBinData!.deleted));
           break;
       }
 
