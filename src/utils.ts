@@ -66,6 +66,7 @@ export async function showDialog<T>(
   });
   win.setMenu(null);
   win.loadFile(path.join(__dirname, `dialog/${name}/index.html`));
+  win.once('ready-to-show', () => win.focus())
 
   return new Promise((resolve) => {
     function onReturn(e, value) {
