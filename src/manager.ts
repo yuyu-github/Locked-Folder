@@ -124,7 +124,7 @@ export function onChangeLFFolder() {
   deleteTmpFiles();
   openedFiles = {};
   fileClipboard = { type: 'none', source: '', files: [] };
-  mainWindow!.webContents.send('changeLFFolder');
+  mainWindow!.webContents.send('changeLFFolder', path.basename(lfFolderPath!));
 }
 
 export async function changePass() {

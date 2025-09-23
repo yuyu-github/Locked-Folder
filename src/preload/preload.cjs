@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
+  ready: () => ipcRenderer.invoke('ready'),
   isOpen: () => ipcRenderer.sendSync('isOpen'),
   openLFFolder: (...params) => ipcRenderer.invoke('openLFFolder', ...params),
   showContextMenu: (...params) => ipcRenderer.invoke('showContextMenu', ...params),

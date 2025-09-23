@@ -1,7 +1,7 @@
 import { app, dialog, ipcMain, Menu, MenuItemConstructorOptions, shell } from 'electron';
 import fs from 'fs';
 import os from 'os';
-import { dirname, join as joinPath } from 'path';
+import path, { dirname, join as joinPath } from 'path';
 import {
   copyFile,
   createFileData,
@@ -21,6 +21,12 @@ import {
 } from './manager.js';
 import { decrypt, nameResolve } from './utils.js';
 import { mainWindow } from './window.js';
+
+ipcMain.handle('ready', () => {
+  if (lfFolderPath) {
+    mainWindow!.webContents.send('changeLFFolder', path.basename(lfFolderPath));
+  }
+})
 
 ipcMain.on('isOpen', (e) => {
   e.returnValue = lfFolderPath !== null;
@@ -214,7 +220,7 @@ ipcMain.handle('paste', (e, path: string) => {
     fileClipboard.source = '';
     fileClipboard.files = [];
   }
-  
+
   saveFileMap();
   mainWindow!.webContents.send('update');
 });

@@ -35,8 +35,9 @@ document.getElementById('forward')!.addEventListener('click', () => {
   setCurrentPath(forwardStack.pop()!, false);
 });
 
-api.onChangeLFFolder(() => {
-  setCurrentPath('/');
+api.onChangeLFFolder((e, name: string) => {
+  document.title = name ? `${name} - Locked Folder` : 'Locked Folder';
   backStack = [];
   forwardStack = [];
+  setCurrentPath('/');
 });

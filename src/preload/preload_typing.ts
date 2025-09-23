@@ -5,6 +5,7 @@ declare global {
 }
 
 interface IApi {
+  ready: () => Promise<void>;
   isOpen: () => boolean;
   openLFFolder: (path: string) => Promise<void>;
   showContextMenu: (caller: string, data: [string, MenuItemConstructorOptions][]) => Promise<void>;
