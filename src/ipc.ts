@@ -209,10 +209,12 @@ ipcMain.handle('paste', (e, path: string) => {
     }
   }
 
-  fileClipboard.type = 'none';
-  fileClipboard.source = '';
-  fileClipboard.files = [];
-
+  if (fileClipboard.type !== 'copy') {
+    fileClipboard.type = 'none';
+    fileClipboard.source = '';
+    fileClipboard.files = [];
+  }
+  
   saveFileMap();
   mainWindow!.webContents.send('update');
 });
