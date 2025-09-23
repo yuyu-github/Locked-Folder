@@ -1,7 +1,7 @@
 import { BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from 'path';
 import { env } from 'process';
-import { changePass, createNewLFFolder, deleteTmpFiles, openLFFolderUI } from './manager.js';
+import { changePass, createNewLFFolder, deleteTmpFiles, lfFolderPath, openLFFolderUI } from './manager.js';
 
 export let mainWindow: BrowserWindow | null;
 
@@ -67,4 +67,10 @@ export function createMainWindow() {
     deleteTmpFiles(true);
     mainWindow = null;
   });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (lfFolderPath) {
+      mainWindow!.webContents.send('changeLFFolder', path.basename(lfFolderPath));
+    }
+  })
 }
