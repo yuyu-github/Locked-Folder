@@ -22,8 +22,11 @@ export const RECYCLE_BIN_PATH = '/$RECYCLE.BIN/';
 export let headerCols: [string, string][] = [];
 export let files: FileData[] = []
 export const selectedFiles: Set<string> = new Set();
+export let currentFile: string | null = null;
 export let sortType = 'name';
 export let sortReverse = false;
+
+export function setCurrentFile(name: string | null) { currentFile = name; }
 
 export const flBackgroundDiv = document.getElementById('fl-background')!;
 const flOuterDiv = document.getElementById('fl-outer')!;
@@ -190,7 +193,7 @@ export async function update() {
 
   const inRecycleBin = (currentPath === RECYCLE_BIN_PATH);
 
-  files = await api.getFiles(currentPath);
+  files = (await api.getFiles(currentPath)).filter(i => `${currentPath}${i.name}/` !== RECYCLE_BIN_PATH);
   files.sort((a, b) => {
     switch (sortType) {
       case 'created': return a.created - b.created;
@@ -206,8 +209,6 @@ export async function update() {
   const fileNames = files.map(f => f.name);
 
   for (let file of files) {
-    if (`${currentPath}${file.name}/` === RECYCLE_BIN_PATH) continue;
-
     const div = document.createElement('div');
     div.classList.add('file');
     div.dataset.name = file.name;
@@ -216,6 +217,7 @@ export async function update() {
     const nameOuterDiv = document.createElement('div');
     nameOuterDiv.classList.add('name-outer');
     if (selectedFiles.has(file.name)) nameOuterDiv.classList.add('selected');
+    if (currentFile === file.name) nameOuterDiv.classList.add('current');
     nameOuterDiv.draggable = true;
     div.appendChild(nameOuterDiv);
 
@@ -282,7 +284,7 @@ export async function update() {
         });
 
         nameOuterDiv.addEventListener('dblclick', () => {
-          setCurrentPath(currentPath + `${file.name}/`);
+          setCurrentPath(`${currentPath}${file.name}/`);
         });
 
         nameOuterDiv.addEventListener('dragover', (e) => {
@@ -337,33 +339,33 @@ export async function update() {
     nameOuterDiv.addEventListener('mousedown', (e) => {
       e.stopPropagation();
 
-      if (selectedFiles.has(file.name)) {
-        if (e.button == 0) {
-          if (e.ctrlKey) {
+      if (e.button == 0) {
+        currentFile = file.name;
+        if (e.ctrlKey) {
+          if (selectedFiles.has(file.name)) {
             selectedFiles.delete(file.name);
-          }
-        }
-      } else {
-        if (e.button == 0) {
-          if (e.ctrlKey) {
-            selectedFiles.add(file.name);
-          } else if (e.shiftKey) {
-            if (selectedFiles.size === 0) {
-              selectedFiles.add(file.name);
-            } else {
-              const start = fileNames.indexOf(selectedFiles.values().next().value!);
-              const end = fileNames.indexOf(file.name);
-              if (start == -1 || end == -1) return;
-  
-              selectedFiles.clear();
-              if (start < end) fileNames.slice(start, end + 1).forEach(n => selectedFiles.add(n));
-              else fileNames.slice(end, start + 1).toReversed().forEach(n => selectedFiles.add(n));
-            }
           } else {
-            selectedFiles.clear();
             selectedFiles.add(file.name);
           }
-        } else if (e.button == 2) {
+        } else if (e.shiftKey) {
+          if (selectedFiles.size === 0) {
+            selectedFiles.add(file.name);
+          } else {
+            const start = fileNames.indexOf(selectedFiles.values().next().value!);
+            const end = fileNames.indexOf(file.name);
+            if (start == -1 || end == -1) return;
+
+            selectedFiles.clear();
+            if (start < end) fileNames.slice(start, end + 1).forEach(n => selectedFiles.add(n));
+            else fileNames.slice(end, start + 1).toReversed().forEach(n => selectedFiles.add(n));
+          }
+        } else {
+          selectedFiles.clear();
+          selectedFiles.add(file.name);
+        }
+      } else if (e.button == 2) {
+        if (!selectedFiles.has(file.name)) {
+          currentFile = file.name;
           selectedFiles.clear();
           selectedFiles.add(file.name);
         }
@@ -381,10 +383,16 @@ api.onUpdate(update);
 export function selectedUpdate() {
   for (let div of flContentsDiv.querySelectorAll('.name-outer')) {
     const name = div.closest<HTMLElement>('.file')!.dataset.name!;
+
     if (selectedFiles.has(name)) {
       div.classList.add('selected');
     } else {
       div.classList.remove('selected');
+    }
+    if (currentFile === name) {
+      div.classList.add('current');
+    } else {
+      div.classList.remove('current');
     }
   }
 }

@@ -127,6 +127,9 @@ body {
   background-color: #cce8ff;
   outline: 1px solid #000;
 }
+#fl-contents .name-outer.current {
+  outline: 1px solid #000;
+}
 #fl-contents .name {
   width: 100%;
 }

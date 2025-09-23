@@ -147,6 +147,10 @@ body {
       background-color: $select-color;
       outline: 1px solid $select-outline-color;
     }
+
+    &.current {
+      outline: 1px solid $select-outline-color;
+    }
   }
 
   .name {

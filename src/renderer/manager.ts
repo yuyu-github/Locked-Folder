@@ -1,4 +1,4 @@
-import { RECYCLE_BIN_PATH, selectedFiles, updateAll } from './filelist.js';
+import { RECYCLE_BIN_PATH, selectedFiles, setCurrentFile, updateAll } from './filelist.js';
 
 export let currentPath = '/';
 
@@ -14,6 +14,7 @@ export function setCurrentPath(path: string, stack = true) {
 
   if (stack && currentPath !== path) {
     selectedFiles.clear();
+    setCurrentFile(null);
     backStack.push(currentPath);
     forwardStack = [];
   }

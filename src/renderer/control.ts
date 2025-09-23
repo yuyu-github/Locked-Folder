@@ -1,5 +1,5 @@
-import { deleteFiles, files, flBackgroundDiv, RECYCLE_BIN_PATH, selectedFiles, selectedUpdate, startRename } from "./filelist.js";
-import { currentPath } from "./manager.js";
+import { currentFile, deleteFiles, files, flBackgroundDiv, RECYCLE_BIN_PATH, selectedFiles, selectedUpdate, setCurrentFile, startRename } from "./filelist.js";
+import { currentPath, setCurrentPath } from "./manager.js";
 
 function onContextMenuClick(e, caller, id) {
   switch (id) {
@@ -89,11 +89,19 @@ document.addEventListener('keydown', (e) => {
   } else if (ctrl && key === 'v') {
     api.paste(currentPath);
     e.preventDefault();
-  } else if (key == 'escape') {
+  } else if (key === 'escape') {
     api.cancelCut();
     e.preventDefault();
-  } else if (key == 'enter' && selectedFiles.size > 0) {
-    api.open(currentPath, Array.from(selectedFiles).at(-1)!);
+  } else if (key === 'enter' && selectedFiles.size > 0) {
+    const name = Array.from(selectedFiles).at(-1)!
+    const file = files.find(f => f.name === name);
+    if (!file) return;
+
+    if (file.isDirectory) {
+      setCurrentPath(`${currentPath}${file.name}/`);
+    } else {
+      api.open(currentPath, file.name);
+    }
     e.preventDefault();
   } else if (key === 'f2' && selectedFiles.size > 0) {
     startRename(Array.from(selectedFiles).at(-1)!);
@@ -101,6 +109,31 @@ document.addEventListener('keydown', (e) => {
   } else if (key === 'delete' && selectedFiles.size > 0) {
     deleteFiles(currentPath, selectedFiles);
     e.preventDefault();
+  } else if (key === 'arrowup' || key === 'arrowdown') {
+    const fileNames = files.map(f => f.name);
+    if (fileNames.length === 0) return;
+    let currentIndex = fileNames.indexOf(currentFile!);
+    if (currentIndex === -1) currentIndex = 0;
+
+    let newIndex = key === 'arrowup' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0) newIndex = 0;
+    if (newIndex >= fileNames.length) newIndex = fileNames.length - 1;
+    
+    const name = fileNames[newIndex];
+    setCurrentFile(name);
+    if (e.ctrlKey) {
+      selectedUpdate();
+    } else {
+      const elem = document.querySelector<HTMLElement>(`.file[data-name="${name}"] .name-outer`)
+      elem?.dispatchEvent(new MouseEvent('mousedown', {shiftKey: e.shiftKey}));
+    }
+  } else if (key === ' ' && currentFile) {
+    if (selectedFiles.has(currentFile)) {
+      selectedFiles.delete(currentFile);
+    } else {
+      selectedFiles.add(currentFile);
+    }
+    selectedUpdate();
   }
 });
 
