@@ -64,7 +64,7 @@ export function createMainWindow() {
   mainWindow.loadFile(path.join(__dirname, 'renderer/index.html'));
 
   mainWindow.on('closed', () => {
-    deleteTmpFiles(true);
+    if (lfFolderPath) deleteTmpFiles(lfFolderPath);
     mainWindow = null;
   });
 

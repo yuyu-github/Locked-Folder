@@ -73,6 +73,7 @@ export async function createNewLFFolder() {
   }
   cryptoKey = crypto.scryptSync(pass, 'salt', 32);
 
+  const oldPath = lfFolderPath;
   lfFolderPath = `${parent}/${lfFolderName}`;
   fs.mkdirSync(lfFolderPath);
 
@@ -84,7 +85,7 @@ export async function createNewLFFolder() {
   fileMap = [];
   fs.writeFileSync(`${lfFolderPath}/map.lfi`, encrypt(cryptoKey, Buffer.from('[]')));
 
-  onChangeLFFolder();
+  onChangeLFFolder(oldPath);
 }
 
 export async function openLFFolderUI() {
@@ -111,17 +112,18 @@ export async function openLFFolder(path: string) {
 
     fileMap = JSON.parse(decrypt(key, fs.readFileSync(`${path}/map.lfi`)).toString());
 
+    const oldPath = lfFolderPath;
     lfFolderPath = path;
     cryptoKey = key;
-    onChangeLFFolder();
+    onChangeLFFolder(oldPath);
   } catch (e) {
     dialog.showErrorBox('エラー', '読み込みに失敗しました');
     console.error(e);
   }
 }
 
-export function onChangeLFFolder() {
-  deleteTmpFiles();
+export function onChangeLFFolder(oldPath: string | null) {
+  if (oldPath) deleteTmpFiles(oldPath);
   openedFiles = {};
   fileClipboard = { type: 'none', source: '', files: [] };
   mainWindow!.webContents.send('changeLFFolder', path.basename(lfFolderPath!));
@@ -193,27 +195,24 @@ export function getChildren(path: string, mkfolder = false): FileData[] {
   return current;
 }
 
-export function deleteTmpFiles(all = false) {
-  if (all) {
-    const tmpDir = path.join(os.tmpdir(), 'LockedFolder/open');
-    if (fs.existsSync(tmpDir)) {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    }
-  } else {
-    for (let f in openedFiles) {
-      if (fs.existsSync(f)) {
-        fs.rmSync(f);
-      }
-    }
-  }
+export function deleteTmpFiles(lfPath: string) {
+  const tmpDir = getTmpDir(lfPath);
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+}
+
+export function getTmpDir(lfPath = lfFolderPath!): string {
+  const lfFolderHash = crypto.createHash('sha256').update(lfPath!).digest('hex');
+  const tmpDir = path.join(
+    os.tmpdir(),
+    'LockedFolder/open',
+    lfFolderHash
+  );
+  return tmpDir;
 }
 
 export function getTmpFilePath(file: FileData): string {
-  const lfFolderHash = crypto.createHash('sha256').update(lfFolderPath!).digest('hex');
   const tmpFilePath = path.join(
-    os.tmpdir(),
-    'LockedFolder/open',
-    lfFolderHash,
+    getTmpDir(lfFolderPath!),
     `${path.parse(file.name).name}_${file.dataName}${path.extname(file.name)}`
   );
   return tmpFilePath;
