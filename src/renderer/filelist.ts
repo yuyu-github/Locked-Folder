@@ -136,6 +136,12 @@ export async function updateHeader() {
       document.addEventListener('mousemove', resize);
       document.addEventListener('mouseup', stopResize);
     });
+
+  }
+
+  if (headerCols.findIndex(i => i[0] === sortType) === -1) {
+    sortType = 'name';
+    sortReverse = false;
   }
 
   await applyViewSettings(headerFlagment);
@@ -143,11 +149,6 @@ export async function updateHeader() {
   flHeaderDiv.innerHTML = '';
   flHeaderDiv.appendChild(headerFlagment);
 
-  if (headerCols.findIndex(i => i[0] === sortType) === -1) {
-    sortType = 'name';
-    sortReverse = false;
-    updateSortIcon();
-  }
 }
 
 export async function applyViewSettings(headerElem: DocumentFragment|Element = flHeaderDiv) {
@@ -160,7 +161,7 @@ export async function applyViewSettings(headerElem: DocumentFragment|Element = f
     if (viewSettings.sortReverse) sortReverse = viewSettings.sortReverse;
   }
 
-  updateSortIcon();
+  await updateSortIcon(headerElem);
 
   for (let [col, _] of headerCols) {
     if (viewSettings.colWidth?.[col]) {
@@ -170,8 +171,8 @@ export async function applyViewSettings(headerElem: DocumentFragment|Element = f
   }
 }
 
-export async function updateSortIcon() {
-  flHeaderDiv.querySelectorAll('.sort-icon').forEach(i => i.remove());
+export async function updateSortIcon(headerElem: DocumentFragment|Element = flHeaderDiv) {
+  headerElem.querySelectorAll('.sort-icon').forEach(i => i.remove());
   const svgStr = `
   <svg width="8" height="4" viewBox="0 0 14 7" xmlns="http://www.w3.org/2000/svg">
     <polyline points="${sortReverse ? '0,7 7,0 14,7' : '0,0 7,7 14,0'}" fill="none" stroke="black" stroke-width="1"/>
@@ -179,7 +180,7 @@ export async function updateSortIcon() {
   `;
   const svg = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
   svg.classList.add('sort-icon');
-  flHeaderDiv.querySelector(`.${sortType}`)?.appendChild(svg);
+  headerElem.querySelector(`.${sortType}`)?.appendChild(svg);
 }
 
 export async function update() {
