@@ -1,7 +1,8 @@
-import { BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
+import fs from 'fs';
 import path from 'path';
 import { env } from 'process';
-import { changePass, createNewLFFolder, deleteTmpFiles, lfFolderPath, openLFFolderUI } from './manager.js';
+import { changePass, createNewLFFolder, deleteTmpFiles, lfFolderPath, openLFFolder, openLFFolderUI } from './manager.js';
 
 export let mainWindow: BrowserWindow | null;
 
@@ -67,6 +68,13 @@ export function createMainWindow() {
     if (lfFolderPath) deleteTmpFiles(lfFolderPath);
     mainWindow = null;
   });
+  
+  mainWindow.webContents.once('did-finish-load', () => {
+    let path = app.isPackaged ? process.argv[1] : process.argv[2];
+    if (path && fs.existsSync(path)) {
+      openLFFolder(path);
+    }
+  })
 
   mainWindow.webContents.on('did-finish-load', () => {
     if (lfFolderPath) {
