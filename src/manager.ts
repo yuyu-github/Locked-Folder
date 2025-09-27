@@ -235,6 +235,7 @@ export function saveFile(file: FileData, data: Buffer) {
 
   file.lastModified = Date.now();
   saveFileMap();
+  mainWindow!.webContents.send('update');
 }
 
 chokidar.watch(path.join(os.tmpdir(), 'LockedFolder/open')).on('change', (filepath) => {
