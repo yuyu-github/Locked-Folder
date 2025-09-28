@@ -13,6 +13,7 @@ import {
   getChildren,
   getItem,
   getTmpFilePath,
+  ignoreFileChanges,
   lfFolderPath,
   openedFiles,
   openLFFolder,
@@ -162,10 +163,12 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
   }
 
   const tmpFilePath = getTmpFilePath(file);
+  openedFiles[tmpFilePath] = file;
+  ignoreFileChanges.add(tmpFilePath);
+
   fs.mkdirSync(dirname(tmpFilePath), { recursive: true });
   fs.writeFileSync(tmpFilePath, data);
   shell.openPath(tmpFilePath);
-  openedFiles[tmpFilePath] = file;
 });
 
 ipcMain.handle('cut', (e, path: string, names: Set<string>) => {

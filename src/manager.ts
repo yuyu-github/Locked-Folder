@@ -46,6 +46,7 @@ export let lfFolderPath: string | null = null;
 export let cryptoKey: Buffer | null = null;
 export let fileMap: FileData[] = [];
 export let openedFiles: Record<string, FileData> = {};
+export let ignoreFileChanges: Set<string> = new Set();
 
 export let fileClipboard: {
   type: 'cut' | 'copy' | 'none',
@@ -240,6 +241,11 @@ export function saveFile(file: FileData, data: Buffer) {
 
 chokidar.watch(path.join(os.tmpdir(), 'LockedFolder/open')).on('change', (filepath) => {
   if (filepath in openedFiles && lfFolderPath && cryptoKey) {
+    if (ignoreFileChanges.has(filepath)) {
+      ignoreFileChanges.delete(filepath);
+      return;
+    }
+
     try {
       const data = fs.readFileSync(filepath);
       saveFile(openedFiles[filepath], data);
