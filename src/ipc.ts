@@ -164,7 +164,7 @@ ipcMain.handle('open', async (e, path: string, name: string) => {
 
   const tmpFilePath = getTmpFilePath(file);
   openedFiles[tmpFilePath] = file;
-  ignoreFileChanges.add(tmpFilePath);
+  if (fs.existsSync(tmpFilePath)) ignoreFileChanges.add(tmpFilePath);
 
   fs.mkdirSync(dirname(tmpFilePath), { recursive: true });
   fs.writeFileSync(tmpFilePath, data);
