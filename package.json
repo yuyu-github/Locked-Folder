@@ -1,6 +1,6 @@
 {
   "name": "locked-folder",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "build/main.cjs",
   "type": "module",
   "build": {
