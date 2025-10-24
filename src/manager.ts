@@ -162,10 +162,15 @@ export async function changePass() {
   }
 }
 
-export function getItem(path: string, name: string): FileData | null {
+export function getItem(path: string, name?: string): FileData | null {
   const pathlist = path.split('/');
   if (!pathlist[0]) pathlist.shift();
   if (!pathlist.at(-1)) pathlist.pop();
+  
+  if (!name) {
+    name = pathlist.at(-1);
+    pathlist.pop();
+  }
 
   let current = fileMap;
   for (let i of pathlist) {
@@ -281,6 +286,7 @@ export function uploadFiles(filePaths: string[], target: string, nest = false) {
   }
 
   if (!nest) {
+    getItem(target)!.lastModified = Date.now();
     saveFileMap();
     mainWindow!.webContents.send('update');
   }
