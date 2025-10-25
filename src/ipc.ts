@@ -18,6 +18,7 @@ import {
   openedFiles,
   openLFFolder,
   saveFileMap,
+  updateFolderLastModified,
   uploadFiles
 } from './manager.js';
 import { decrypt, nameResolve } from './utils.js';
@@ -88,7 +89,7 @@ ipcMain.handle('getFiles', (e, path: string) => {
 ipcMain.handle('newFile', async (e, path: string) => {
   const name = nameResolve(path, '新しいファイル');
   getChildren(path, true).push(createFileData(name));
-  getItem(path)!.lastModified = Date.now();
+  updateFolderLastModified(path)
 
   saveFileMap();
   mainWindow!.webContents.send('startRename', name);
@@ -97,7 +98,7 @@ ipcMain.handle('newFile', async (e, path: string) => {
 ipcMain.handle('newFolder', async (e, path: string) => {
   const name = nameResolve(path, '新しいフォルダ');
   getChildren(path, true).push(createFolderData(name));
-  getItem(path)!.lastModified = Date.now();
+  updateFolderLastModified(path)
 
   saveFileMap();
   mainWindow!.webContents.send('startRename', name);
@@ -198,14 +199,14 @@ ipcMain.handle('paste', (e, path: string) => {
       file.name = nameResolve(path, file.name);
       targetChildren.push(file);
     }
-    getItem(path)!.lastModified = Date.now();
+    updateFolderLastModified(path)
   } else if (fileClipboard.type === 'cut' && fileClipboard.source !== path) {
     const targetChildren = getChildren(path, true);
     for (let file of fileClipboard.files) {
       file.name = nameResolve(path, file.name);
       targetChildren.push(file);
     }
-    getItem(path)!.lastModified = Date.now();
+    updateFolderLastModified(path)
 
     const sourceChildren = getChildren(fileClipboard.source);
     const names = new Set(fileClipboard.files.map(i => i.name));
@@ -246,14 +247,14 @@ ipcMain.handle('move', (e, src: string, names: Set<string>, target: string) => {
       srcChildren.splice(i, 1);
     }
   }
-  getItem(src)!.lastModified = Date.now();
+  updateFolderLastModified(src)
   
   const targetChildren = getChildren(target, true);
   for (let file of files) {
     file.name = nameResolve(target, file.name);
     targetChildren.push(file);
   }
-  getItem(target)!.lastModified = Date.now();
+  updateFolderLastModified(target)
 
   saveFileMap();
   mainWindow!.webContents.send('update');
@@ -286,7 +287,7 @@ ipcMain.handle('delete', async (e, path: string, names: Set<string>) => {
       children.splice(i, 1);
     }
   }
-  getItem(path)!.lastModified = Date.now();
+  updateFolderLastModified(path)
 
   saveFileMap();
   mainWindow!.webContents.send('update');
@@ -301,7 +302,7 @@ ipcMain.handle('moveToRecycleBin', async (e, path: string, names: Set<string>, r
       srcChildren.splice(i, 1);
     }
   }
-  getItem(path)!.lastModified = Date.now();
+  updateFolderLastModified(path)
   
   const recycleBin = getChildren(recycleBinPath, true);
   for (let file of files) {
@@ -337,7 +338,7 @@ ipcMain.handle('restore', async (e, names: Set<string>, recycleBinPath: string) 
     file.name = nameResolve(orgPath, orgName);
     delete file.recycleBinData;
     targetChildren.push(file);
-    getItem(orgPath)!.lastModified = Date.now();
+    updateFolderLastModified(orgPath)
   }
 
   saveFileMap();

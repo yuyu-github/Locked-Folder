@@ -168,6 +168,7 @@ export function getItem(path: string, name?: string): FileData | null {
   if (!pathlist.at(-1)) pathlist.pop();
   
   if (!name) {
+    if (pathlist.length === 0) return null;
     name = pathlist.at(-1);
     pathlist.pop();
   }
@@ -199,6 +200,11 @@ export function getChildren(path: string, mkfolder = false): FileData[] {
     }
   }
   return current;
+}
+
+export function updateFolderLastModified(path: string) {
+  const folder = getItem(path);
+  if (folder) folder.lastModified = Date.now();
 }
 
 export function deleteTmpFiles(lfPath: string) {
